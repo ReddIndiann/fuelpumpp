@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -9,27 +10,40 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  FlatList,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
-
-const clients = [
-  { name: 'Airi Satou', phoneNumber: '0204027337' },
-  { name: 'Ashton Cox', phoneNumber: '0204027337' },
-  { name: 'Bradley Greer', phoneNumber: '0204027337' },
-  { name: 'Brielle Williamson', phoneNumber: '0204027337' },
-  { name: 'Cedric Kelly', phoneNumber: '0204027337' },
-  { name: 'Dai Rios', phoneNumber: '0204027337' },
-  // Add more clients as needed
-];
 
 const AddClients = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [clientsPerPage] = useState(6);
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const navigateToScreen = useNavigateToScreen();
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axios.post('https://gcnm.wigal.com.gh/getCustomers', {
+          agent_id: "2",
+        });
+        console.log('API response:', response.data);
+        setClients(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching clients:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, []);
+
   const handleSearch = (text) => {
     setSearchQuery(text);
   };
@@ -39,11 +53,26 @@ const AddClients = () => {
     client.phoneNumber.includes(searchQuery)
   );
 
-  const indexOfLastClient = currentPage * clientsPerPage;
-  const indexOfFirstClient = indexOfLastClient - clientsPerPage;
-  const currentClients = filteredClients.slice(indexOfFirstClient, indexOfLastClient);
-
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
+  const renderClient = ({ item }) => (
+    <TouchableOpacity
+    style={styles.tableRow}
+    onPress={() => navigateToScreen('existingclienttransaction', { client: item })}
+  >
+    <Text style={styles.tableRowText}>{item.name}</Text>
+    <Text style={styles.tableRowText}>{item.phoneNumber}</Text>
+  </TouchableOpacity>
+  
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007B5D" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,8 +87,8 @@ const AddClients = () => {
           </Text>
           <View style={styles.headerContainer}>
             <Text style={styles.label}>Existing Clients</Text>
-            <TouchableOpacity style={styles.addClientButton}>
-              <Text style={styles.addClientButtonText}  onPress={()=>navigateToScreen('addclient')}>Add New Client</Text>
+            <TouchableOpacity style={styles.addClientButton} onPress={() => navigateToScreen('addclient')}>
+              <Text style={styles.addClientButtonText}>Add New Client</Text>
             </TouchableOpacity>
           </View>
           <TextInput
@@ -74,12 +103,12 @@ const AddClients = () => {
               <Text style={styles.tableHeaderText}>Name</Text>
               <Text style={styles.tableHeaderText}>Phone Number</Text>
             </View>
-            {currentClients.map((client, index) => (
-              <View key={index} style={styles.tableRow}>
-                <Text style={styles.tableRowText}>{client.name}</Text>
-                <Text style={styles.tableRowText}>{client.phoneNumber}</Text>
-              </View>
-            ))}
+            <FlatList
+              data={filteredClients}
+              renderItem={renderClient}
+              keyExtractor={(item, index) => index.toString()}
+              style={styles.flatList}
+            />
           </View>
           <View style={styles.paginationContainer}>
             {Array.from({ length: Math.ceil(filteredClients.length / clientsPerPage) }, (_, i) => i + 1).map((page) => (
@@ -153,7 +182,7 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#f0f0f0',
-    padding: 15, // Increase padding to increase height
+    padding: 15,
   },
   tableHeaderText: {
     flex: 1,
@@ -162,7 +191,7 @@ const styles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: 'row',
-    padding: 15, // Increase padding to increase height
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -190,9 +219,12 @@ const styles = StyleSheet.create({
   activePaginationButtonText: {
     color: '#fff',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flatList: {
+    flexGrow: 0,
+  },
 });
-
-
-
-
-

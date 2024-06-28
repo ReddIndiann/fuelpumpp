@@ -116,7 +116,7 @@ const AppTabs = () => {
 
       <Tab.Screen name="Record" component={StockRecords} />
      
-      <Tab.Screen name="Client" component={Clients} />
+      <Tab.Screen name="Client" component={AddClients} />
       <Tab.Screen name="Transactions" component={ExistingClientTransaction} />
      
     </Tab.Navigator>

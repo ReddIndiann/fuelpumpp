@@ -52,7 +52,7 @@ import {
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <Text style={styles.title}>Product Supply</Text>
             <Text style={styles.pageinfo}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+              Lorem ipsum dolor sit amet,
             </Text>
             
             <Text style={styles.label}>Select Product Type</Text>

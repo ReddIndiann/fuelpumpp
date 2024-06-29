@@ -14,7 +14,7 @@ import {
   FlatList,
 } from 'react-native';
 import axios from 'axios';
-import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
+import { useNavigation } from '@react-navigation/native';
 
 const AddClients = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,7 +24,7 @@ const AddClients = () => {
   const [loading, setLoading] = useState(true);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
-  const navigateToScreen = useNavigateToScreen();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -57,13 +57,15 @@ const AddClients = () => {
 
   const renderClient = ({ item }) => (
     <TouchableOpacity
-    style={styles.tableRow}
-    onPress={() => navigateToScreen('existingclienttransaction', { client: item })}
-  >
-    <Text style={styles.tableRowText}>{item.name}</Text>
-    <Text style={styles.tableRowText}>{item.phoneNumber}</Text>
-  </TouchableOpacity>
-  
+      style={styles.tableRow}
+      onPress={() => {
+        console.log('Navigating to ExistingClientTransaction with client:', item);
+        navigation.navigate('existingclienttransaction', { client: item });
+      }}
+    >
+      <Text style={styles.tableRowText}>{item.name}</Text>
+      <Text style={styles.tableRowText}>{item.phoneNumber}</Text>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -83,11 +85,11 @@ const AddClients = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Clients</Text>
           <Text style={styles.pageInfo}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+            Lorem ipsum dolor sit amet,
           </Text>
           <View style={styles.headerContainer}>
             <Text style={styles.label}>Existing Clients</Text>
-            <TouchableOpacity style={styles.addClientButton} onPress={() => navigateToScreen('addclient')}>
+            <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('addclient')}>
               <Text style={styles.addClientButtonText}>Add New Client</Text>
             </TouchableOpacity>
           </View>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -12,15 +12,15 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
+
 import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
 
 const ExistingClientTransaction = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const navigateToScreen = useNavigateToScreen();
-  
   const route = useRoute();
-  const { client } = route.params;
+  const { client } = route.params; // Extract client data from route parameters
 
   return (
     <SafeAreaView style={styles.container}>
@@ -38,7 +38,7 @@ const ExistingClientTransaction = () => {
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
                 <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
-                <Text style={styles.clientAmount}>$35,078</Text>
+                <Text style={styles.clientAmount}>$35,078</Text> 
               </View>
             </View>
           </View>
@@ -161,5 +161,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     marginTop: 5,
+    textAlign: 'center',
   },
 });

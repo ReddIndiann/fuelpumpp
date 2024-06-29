@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "Tornyelli",
-    "slug": "Tornyelli",
+    "name": "fuelsystem",
+    "slug": "fuelsystem",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/blackpump.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/blackpump.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,7 +22,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/blackpump.png"
     },
     "extra": {
       "eas": {

@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -9,15 +10,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
-import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ModalDropdown from 'react-native-modal-dropdown';
 import axios from 'axios';
 
 
+const WithdrawFunds = ({ route }) => {
+  const { client } = route.params; // Get client data from navigation params
 
-const AddFunds = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [amount, setAmount] = useState('');
   const [wallet, setWallet] = useState('');
@@ -52,21 +54,21 @@ const AddFunds = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Add Funds</Text>
+          <Text style={styles.title}>Withdraw Funds</Text>
           
           {/* Client Information Card */}
           <View style={styles.clientCard}>
             <View style={styles.clientCardHeader}>
               <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
               <View>
-                <Text style={styles.clientName}>Brielle Williamson</Text>
-                <Text style={styles.clientPhone}>0204027337</Text>
+                <Text style={styles.clientName}>{client.name}</Text>
+                <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
                 <Text style={styles.clientAmount}>$35,078</Text>
               </View>
             </View>
           </View>
 
-          <Text style={styles.title}>Add Funds</Text>
+          <Text style={styles.title}>Withdraw Funds</Text>
          
           <Text style={styles.label}>Enter Amount</Text>
           
@@ -81,7 +83,7 @@ const AddFunds = () => {
 
           <Text style={styles.label}>Select Wallet</Text>
           
-          <View style={styles.inputContainer}>
+          
             <ModalDropdown 
               options={['3', 'Another Wallet']} 
               style={styles.dropdown}
@@ -89,11 +91,11 @@ const AddFunds = () => {
               dropdownStyle={styles.dropdownMenu}
               onSelect={(index, value) => setWallet(value)}
             />
-          </View>
+        
 
           <Text style={styles.label}>Select Payment Method</Text>
           
-          <View style={styles.inputContainer}>
+          
             <ModalDropdown 
               options={['MTN', 'Vodafone']} 
               style={styles.dropdown}
@@ -101,7 +103,7 @@ const AddFunds = () => {
               dropdownStyle={styles.dropdownMenu}
               onSelect={(index, value) => setPaymentOption(value)}
             />
-          </View>
+       
         
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -122,7 +124,7 @@ const AddFunds = () => {
   );
 };
 
-export default AddFunds;
+export default WithdrawFunds;
 
 const styles = StyleSheet.create({
   container: {

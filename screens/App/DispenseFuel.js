@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -10,42 +11,21 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
-import React, { useState, useEffect } from 'react';
+import ModalDropdown from 'react-native-modal-dropdown';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-const clients = [
-  { name: 'Airi Satou', phoneNumber: '0204027337' },
-  { name: 'Ashton Cox', phoneNumber: '0204027337' },
-  { name: 'Bradley Greer', phoneNumber: '0204027337' },
-  { name: 'Brielle Williamson', phoneNumber: '0204027337' },
-  { name: 'Cedric Kelly', phoneNumber: '0204027337' },
-  { name: 'Dai Rios', phoneNumber: '0204027337' },
-  // Add more clients as needed
-];
+import { useRoute } from '@react-navigation/native';
 
 const DispenseFuel = () => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const route = useRoute();
+  const { client } = route.params; // Retrieve client data from route parameters
+
   const [searchQuery, setSearchQuery] = useState('');
   const [password, setPassword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [clientsPerPage] = useState(5);
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-  };
-
-  const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phoneNumber.includes(searchQuery)
-  );
-
-  const indexOfLastClient = currentPage * clientsPerPage;
-  const indexOfFirstClient = indexOfLastClient - clientsPerPage;
-  const currentClients = filteredClients.slice(indexOfFirstClient, indexOfLastClient);
-
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  const [productType, setProductType] = useState('');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,8 +41,8 @@ const DispenseFuel = () => {
             <View style={styles.clientCardHeader}>
               <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
               <View>
-                <Text style={styles.clientName}>Brielle Williamson</Text>
-                <Text style={styles.clientPhone}>0204027337</Text>
+                <Text style={styles.clientName}>{client.name}</Text>
+                <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
                 <Text style={styles.clientAmount}>$35,078</Text>
               </View>
             </View>
@@ -73,14 +53,13 @@ const DispenseFuel = () => {
           <Text style={styles.label}>Select Product Type</Text>
           
           <View style={styles.inputContainer}>
-            <RNPickerSelect
-              onValueChange={(value) => setProductType(value)}
-              items={[
-                { label: 'Product 1', value: 'product1' },
-                { label: 'Product 2', value: 'product2' },
-              ]}
-              style={pickerSelectStyles}
-              placeholder={{ label: 'Select your product type', value: null }}
+            <ModalDropdown
+              options={['Product 1', 'Product 2']}
+              style={styles.dropdown}
+              textStyle={styles.dropdownText}
+              dropdownStyle={styles.dropdownMenu}
+              onSelect={(index, value) => setProductType(value)}
+              defaultValue="Select your product type"
             />
             <TouchableOpacity>
               <Icon size={24} color="#a0a0a0" />
@@ -276,147 +255,77 @@ const styles = StyleSheet.create({
   },
   actionButtonRed: {
     flex: 1,
-    backgroundColor: '#F44336',
+    backgroundColor: '#FF0000',
     paddingHorizontal: 10,
     paddingVertical: 25,
     borderRadius: 20,
     marginBottom: 10,
+    marginRight: 5,
     alignItems: 'center',
   },
   actionButtonText: {
     color: '#fff',
-    fontSize: 14,
-  },
-  label: {
-    fontSize: 20,
-    marginBottom: 10,
-  },
-  searchInput: {
-    height: 50,
-    borderColor: '#a0a0a0',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingLeft: 15,
-    marginBottom: 20,
-  },
-  tableContainer: {
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-  },
-  tableHeaderText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  tableRowText: {
-    flex: 1,
-    fontSize: 16,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  paginationButton: {
-    marginHorizontal: 5,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  activePaginationButton: {
-    backgroundColor: '#007B5D',
-  },
-  paginationButtonText: {
-    fontSize: 16,
-  },
-  activePaginationButtonText: {
-    color: '#fff',
-  },
-  pageinfo: {
-    fontSize: 20,
-    alignSelf: 'flex-start',
-    marginLeft: 20,
-  },
-  inputContainer: {
-    width: '100%',
-    height: 50,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
+    fontSize: 12,
+    marginTop: 10,
+    textAlign: 'center',
   },
   input: {
-    width: '90%',
     height: 50,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
+    borderColor: '#d0d0d0',
     borderWidth: 1,
-    borderColor: '#a0a0a0',
-  },
-  inputt: {
-    width: '90%',
-    height: 45,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    borderRadius: 5,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-    height: 50,
-    borderRadius: 10,
-    marginVertical: 10,
     borderWidth: 1,
-    borderColor: '#a0a0a0',
-    paddingHorizontal: 1,
+    borderColor: '#d0d0d0',
+    marginBottom: 20,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    height: 50,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d0d0d0',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    height: 50,
+  },
+  inputt: {
+    flex: 1,
+    fontSize: 16,
   },
   readOnlyInput: {
     backgroundColor: '#f0f0f0',
-    color: '#a0a0a0',
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+  label: {
+    fontSize: 16,
+    fontWeight: '300',
+    marginBottom: 5,
+  },
+  dropdown: {
+    flex: 1,
     borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 4,
-    color: 'white',
-    borderColor: '#fff',
-  },
-  inputAndroid: {
-    fontSize: 18,
+    borderColor: '#d0d0d0',
+    borderRadius: 5,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
-    borderColor: 'gray',
-    borderRadius: 8,
-    color: 'white',
-    borderColor: '#fff',
+    justifyContent: 'center',
+    height: 50,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  dropdownMenu: {
+    borderWidth: 1,
+    borderColor: '#d0d0d0',
+    borderRadius: 5,
+    marginTop: 8,
   },
 });

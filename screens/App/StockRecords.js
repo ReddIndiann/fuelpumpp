@@ -87,14 +87,7 @@ const StockRecords = () => {
       });
   };
 
-  useEffect(() => {
-    if (email && password) {
-      setIsButtonEnabled(true);
-    } else {
-      setIsButtonEnabled(false);
-    }
-  }, [email, password]);
-
+ 
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -104,7 +97,7 @@ const StockRecords = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Stock Records</Text>
           <Text style={styles.pageinfo}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+            Lorem ipsum dolor sit amet
           </Text>
           <Text style={styles.label}>Select Product Type</Text>
           <View style={styles.inputContainer}>
@@ -155,7 +148,7 @@ const StockRecords = () => {
           )}
 
           <Text style={styles.label}>Enter Dipping Quantity</Text>
-          <View style={styles.inputContainer}>
+       
             <TextInput
               placeholder="Enter quantity"
               value={dippingQuantity}
@@ -164,10 +157,10 @@ const StockRecords = () => {
               keyboardType='numeric'
               placeholderTextColor="#a0a0a0"
             />
-          </View>
+          
 
           <Text style={styles.label}>Enter Dispenser Quantity</Text>
-          <View style={styles.inputContainer}>
+        
             <TextInput
               placeholder="Enter quantity"
               value={dispenserQuantity}
@@ -176,12 +169,12 @@ const StockRecords = () => {
               keyboardType='numeric'
               placeholderTextColor="#a0a0a0"
             />
-          </View>
+          
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.button, !isButtonEnabled && styles.buttonDisabled, isTablet && styles.tabletButton]}
-              disabled={!isButtonEnabled}
+              style={[styles.button,  isTablet && styles.tabletButton]}
+          
               onPress={handleSubmit}
             >
               <Text style={styles.signInText}>Submit</Text>
@@ -286,7 +279,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007B5D',
     borderWidth: 1,
     justifyContent: 'center',
-    marginBottom: 15,
+    marginBottom: 60,
     borderRadius: 10,
     marginRight: 20,
     alignItems: 'center',

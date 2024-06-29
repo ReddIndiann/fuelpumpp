@@ -13,17 +13,17 @@ const Home = () => {
       value: "25,000.40",
     },
     {
-       img: require('./dashback1.png'),
+       img: require('./dashback2.png'),
       icontext: "Stock Records",
       value: 123456789,
     },
     {
-       img: require('./dashback1.png'),
+       img: require('./dashback4.png'),
       icontext: "Existing Users",
       value: 123456789,
     },
     {
-       img: require('./dashback1.png'),
+       img: require('./dashback5.png'),
       icontext: "New Users",
       value: 123456789,
     },
@@ -325,6 +325,7 @@ const styles = StyleSheet.create({
   },
   barLabel: {
     marginTop: 10,
+    
     
     textAlign: 'center',
   },

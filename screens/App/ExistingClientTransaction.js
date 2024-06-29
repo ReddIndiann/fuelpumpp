@@ -5,22 +5,58 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Alert,
   useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useRoute } from '@react-navigation/native';
-
-import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 const ExistingClientTransaction = () => {
   const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  const navigateToScreen = useNavigateToScreen();
+  const navigation = useNavigation();
   const route = useRoute();
-  const { client } = route.params; // Extract client data from route parameters
+  const { client } = route.params;
+
+  const handleCloseAccount = () => {
+    Alert.alert(
+      'Confirm Account Closure',
+      'Are you sure you want to close this account?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => closeAccount(),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const closeAccount = async () => {
+    try {
+      const response = await axios.post('https://gcnm.wigal.com.gh/closingingaccount', {
+        client_id: client.id,
+        customer_id: client.customerId,
+        location_id: client.locationId,
+        paymentoption: "MTN",
+      });
+      if (response.status === 200) {
+        Alert.alert('Success', 'Account closed successfully');
+        navigation.navigate('Main');
+      } else {
+        Alert.alert('Error', 'Failed to close account');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to close account');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,19 +81,34 @@ const ExistingClientTransaction = () => {
 
           {/* Action Buttons */}
           <View style={styles.actionsContainer}>
-            <TouchableOpacity style={styles.actionButtonBlue} onPress={() => navigateToScreen('dispensefuel')}>
+            <TouchableOpacity
+              style={styles.actionButtonBlue}
+              onPress={() => navigation.navigate('dispensefuel', { client })}
+            >
               <Icon name="local-gas-station" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Dispense Fuel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButtonYellow} onPress={() => navigateToScreen('addfunds')}>
+
+            <TouchableOpacity
+              style={styles.actionButtonYellow}
+              onPress={() => navigation.navigate('addfunds', { client })}
+            >
               <Icon name="attach-money" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Add Funds</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButtonGreen} onPress={() => navigateToScreen('redrawfund')}>
+
+            <TouchableOpacity
+              style={styles.actionButtonGreen}
+              onPress={() => navigation.navigate('redrawfund', { client })}
+            >
               <Icon name="remove-circle" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Withdraw Funds</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButtonRed} onPress={() => navigateToScreen('Main')}>
+
+            <TouchableOpacity
+              style={styles.actionButtonRed}
+              onPress={handleCloseAccount}
+            >
               <Icon name="close" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Close Account</Text>
             </TouchableOpacity>

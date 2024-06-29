@@ -18,8 +18,6 @@ import { useNavigation } from '@react-navigation/native';
 
 const AddClients = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [clientsPerPage] = useState(6);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const { width } = useWindowDimensions();
@@ -45,6 +43,7 @@ const AddClients = () => {
   }, []);
 
   const handleSearch = (text) => {
+    console.log('Search query:', text);
     setSearchQuery(text);
   };
 
@@ -53,7 +52,7 @@ const AddClients = () => {
     client.phoneNumber.includes(searchQuery)
   );
 
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  console.log('Filtered clients:', filteredClients);
 
   const renderClient = ({ item }) => (
     <TouchableOpacity
@@ -111,17 +110,6 @@ const AddClients = () => {
               keyExtractor={(item, index) => index.toString()}
               style={styles.flatList}
             />
-          </View>
-          <View style={styles.paginationContainer}>
-            {Array.from({ length: Math.ceil(filteredClients.length / clientsPerPage) }, (_, i) => i + 1).map((page) => (
-              <TouchableOpacity
-                key={page}
-                style={[styles.paginationButton, currentPage === page && styles.activePaginationButton]}
-                onPress={() => handlePageChange(page)}
-              >
-                <Text style={[styles.paginationButtonText, currentPage === page && styles.activePaginationButtonText]}>{page}</Text>
-              </TouchableOpacity>
-            ))}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

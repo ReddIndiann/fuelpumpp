@@ -44,10 +44,7 @@ const AppTabs = () => {
           } else if (route.name === 'Client') {
             iconName = focused ? 'people' : 'people-outline';
             label = 'Clients';
-          } else if (route.name === 'Transactions') {
-            iconName = focused ? 'swap-horizontal' : 'swap-horizontal-outline';
-            label = 'Transactions';
-          }
+          } 
 
           return (
             <View style={{ alignItems: 'center' }}>
@@ -117,7 +114,7 @@ const AppTabs = () => {
       <Tab.Screen name="Record" component={StockRecords} />
      
       <Tab.Screen name="Client" component={AddClients} />
-      <Tab.Screen name="Transactions" component={ExistingClientTransaction} />
+      
      
     </Tab.Navigator>
   );

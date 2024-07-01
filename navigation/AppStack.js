@@ -18,11 +18,13 @@ import ProductSupply from "../screens/App/Productsupply";
 import AddClients from "../screens/App/AddClient";
 import RedrawFund from "../screens/App/RedrawFund";
 import ExistingClientTransaction from "../screens/App/ExistingClientTransaction";
+import AuthStack from './AuthStack';
 const Stack = createStackNavigator();
 
 const AppStack = () => {
   return (
-    <Stack.Navigator initialRouteName="BottomTabs">
+    <Stack.Navigator initialRouteName="Auth">
+     <Stack.Screen name="Auth" component={AuthStack} options={{ headerShown: false }} />
       <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ headerShown: false }} />
       <Stack.Screen name="AddReminder" component={AddReminder} options={{ headerShown: false }}/>
       <Stack.Screen name="UserProfile" component={UserProfile} />

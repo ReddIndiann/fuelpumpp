@@ -15,7 +15,7 @@ const Passwordsuccess = () => {
   const isTablet = width >= 768;
   return (
     <SafeAreaView style={styles.container}>
-<Image source={require('../assets/checkimg.png')} style={styles.image} />
+<Image source={require('./checkimg.png')} style={styles.image} />
 <View style={styles.textcontainer}>
     <Text style={styles.textitem} >Password created</Text>
     <Text style={styles.textitem1}> Your password has been created</Text>

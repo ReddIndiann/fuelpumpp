@@ -114,7 +114,7 @@ import {
                 onPress={handleLogin}
                 disabled={!isButtonEnabled}
               >
-                <Text style={styles.signInText }  onPress={()=>navigateToScreen('Passwordsuccess')}>Reset password</Text>
+                <Text style={styles.signInText }  onPress={()=>navigateToScreen('PasswordSucess')}>Reset password</Text>
               </TouchableOpacity>
        
             </View>

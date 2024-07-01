@@ -2,15 +2,16 @@
 import { StyleSheet, SafeAreaView, Text, View, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import React, { useState } from 'react';
 import Swiper from 'react-native-swiper';
-
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
 
   
 const Intro = () => {
-
+  const navigation = useNavigation();
   const slides = [
     {
-        img: require('../assets/slider3.png'), 
+        img: require('./slider3.png'), 
         text1: 'Welcome to Fuel Management App',
         text2: 'Welcome! Input vehicle info for', 
         text3: 'personalized savings. Let us',
@@ -19,7 +20,7 @@ const Intro = () => {
      
     },
     {
-        img: require('../assets/slider4.png'), // update the path to your second image
+        img: require('./slider4.png'), // update the path to your second image
         text1: 'Track, Analyze, Save',
         text2: 'Welcome! Easily track fuel,', 
         text3: 'save money, and reduce',
@@ -28,7 +29,7 @@ const Intro = () => {
       
     },
     {
-      img: require('../assets/slider5.png'), // update the path to your second image
+      img: require('./slider5.png'), // update the path to your second image
       text1: 'Maximize Efficiency with \t Fuel Management App',
       text2: 'Welcome to the future of fuel', 
       text3: 'management! Get ready to',
@@ -57,10 +58,10 @@ const Intro = () => {
       </Swiper>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, isTablet && styles.tabletButton]} onPress={()=>navigateToScreen('login')}>
+        <TouchableOpacity style={[styles.button, isTablet && styles.tabletButton]} onPress={() => navigation.navigate('BottomTabs')} >
           <Text style={styles.signInText}>Let’s begin</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button1, isTablet && styles.tabletButton1]} onPress={()=>navigateToScreen('Main')}>
+        <TouchableOpacity style={[styles.button1, isTablet && styles.tabletButton1]} onPress={()=>navigateToScreen('Login')}>
           <Text style={styles.signUpText}>Log in</Text>
         </TouchableOpacity>
       </View>

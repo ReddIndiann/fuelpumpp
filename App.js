@@ -11,7 +11,8 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <AppStack /> : <AuthStack />}
+      <AppStack/>
+      {/* {isAuthenticated ? <AppStack /> : <AuthStack />} */}
     </NavigationContainer>
   );
 };

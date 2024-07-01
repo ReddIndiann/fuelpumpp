@@ -17,15 +17,15 @@ import {
   import Icon from 'react-native-vector-icons/MaterialIcons';
   
   import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
-
   
-  const ForgotPassword = () => {
+  const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [keyboardOpen, setKeyboardOpen] = useState(false);
     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(true);
+  
     const navigateToScreen = useNavigateToScreen();
     const { width } = useWindowDimensions();
   
@@ -33,6 +33,15 @@ import {
   
     const togglePasswordVisibility = () => {
       setPasswordVisible(!passwordVisible);
+    };
+  
+    const handleLogin = () => {
+      // Mock login logic
+      if (password !== 'correctPassword') { // Replace with your actual login logic
+        setIsModalVisible(true);
+      } else {
+        navigateToScreen('login');
+      }
     };
   
     useEffect(() => {
@@ -50,12 +59,12 @@ import {
     }, []);
   
     useEffect(() => {
-      if (email ) {
+      if (email && password) {
         setIsButtonEnabled(true);
       } else {
         setIsButtonEnabled(false);
       }
-    }, [email]);
+    }, [email, password]);
   
     return (
       <SafeAreaView style={styles.container}>
@@ -64,69 +73,74 @@ import {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-            <Text style={styles.title}>Forgot your password?</Text>
+            <Text style={styles.title}>Log in</Text>
             <Text style={styles.pageinfo}>
-            Please provide us with the email address associated with your account. We will sent an email to help you reset your password.
+              Welcome! Please login to access your account and unlock a world of fuel management convenience
             </Text>
-           
+            <TextInput
+              placeholder="E-mail address"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+            />
             <View style={styles.passwordContainer}>
               <TextInput
-                placeholder="E-mail address"
-                value={email}
-                onChangeText={(text) => setEmail(text)}
+                placeholder="Password"
+                value={password}
+                onChangeText={(text) => setPassword(text)}
                 style={[styles.inputt, { flex: 1, borderColor: '#FFFFFF' }]}
-              
+                secureTextEntry={!passwordVisible}
                 placeholderTextColor="#a0a0a0"
               />
               <TouchableOpacity onPress={togglePasswordVisibility}>
                 <Icon name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="#a0a0a0" />
               </TouchableOpacity>
             </View>
-       
+            <Pressable style={styles.forgotpassword} onPress={() => navigateToScreen('ForgetPassword')}>
+              <Text style={styles.forgotpassword}>Forgot password?</Text>
+            </Pressable>
             <View style={[styles.buttonContainer, keyboardOpen && styles.buttonContainerKeyboardOpen]}>
               <TouchableOpacity
                 style={[styles.button, !isButtonEnabled && styles.buttonDisabled, isTablet && styles.tabletButton]}
-                onPress={() => navigateToScreen('ResetPassword')}
+                onPress={handleLogin}
                 disabled={!isButtonEnabled}
               >
-                <Text style={styles.signInText}>Recover account</Text>
+                <Text style={styles.signInText}>Log in</Text>
               </TouchableOpacity>
-             
+              <TouchableOpacity
+                style={[styles.button1, isTablet && styles.tabletButton1]}
+                onPress={() => navigateToScreen('onBoard')}
+              >
+                <Text style={styles.signUpText}>Sign up with Google</Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
+  
         <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => {
-          setIsModalVisible(!isModalVisible);
-        }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View
-              style={styles.closeButton}
-           
-            >
-<Text style={styles.modalheader}>Request sent.</Text>
+          animationType="slide"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={() => {
+            setIsModalVisible(!isModalVisible);
+          }}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <TouchableOpacity style={styles.modalIconContainer} onPress={() => setIsModalVisible(false)}>
+                <Icon name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.modalMessage}>The password or the e-mail address is incorrect</Text>
+              
             </View>
-           
-            <Text style={styles.modalMessage}>An email has been sent to your registered email address with instructions to help you recover your password. Please check your inbox and follow the provided steps to regain access to your account.</Text>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text style={styles.modalButtonText}>OK</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        </Modal>
       </SafeAreaView>
     );
   };
   
-  export default ForgotPassword;
+  export default LoginPage;
   
   const styles = StyleSheet.create({
     container: {
@@ -187,11 +201,11 @@ import {
     buttonContainer: {
       flexDirection: 'column',
       justifyContent: 'space-between',
-      marginTop: 400,
+      marginTop: 300,
       marginVertical: 20,
     },
     buttonContainerKeyboardOpen: {
-      marginTop: 30,
+      marginTop: 10,
     },
     button: {
       width: 300,
@@ -234,41 +248,47 @@ import {
       fontSize: 17,
     },
     modalOverlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-      },
-      modalContainer: {
-        width: '80%',
-        padding: 20,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        alignItems: 'center',
-        position: 'relative',
-      },
-      modalheader: {
-       fontWeight:"bold",
-       fontSize:20,
-       marginBottom:5
-       
-        
-      },
-      modalIconContainer: {
-        width: '100%',
-        alignItems: 'center',
-        marginBottom: 10,
-        padding: 10,
-      },
-      modalMessage: {
-        color: '#000000',
-        textAlign:"center",
-        fontSize: 18,
-      },
-      modalButtonText: {
-        fontWeight:"500",
-        fontSize:20,
-        marginTop:10
-      },
+      flex: 1,
+
+      justifyContent: 'center',
+      alignItems: 'center',
+    
+      marginTop:300
+    },
+    modalContainer: {
+      width: '90%',
+ marginRight:10,
+ backgroundColor: '#D32F2F',
+      borderRadius: 10,
+      alignItems: 'center',
+      flexDirection:"row",
+      padding:10
+    
+    },
+    modalIconContainer: {
+      width: '15%',
+      alignItems: 'center',
+      marginBottom: 10,
+      padding: 10,
+      backgroundColor: '#D32F2F',
+      borderRadius: 5,
+    },
+    modalMessage: {
+      fontSize: 16,
+      marginBottom: 20,
+      color: '#fff',
+      fontWeight:"bold"
+    },
+    modalButton: {
+      width: '100%',
+      padding: 10,
+      backgroundColor: '#007B5D',
+      borderRadius: 5,
+      alignItems: 'center',
+    },
+    modalButtonText: {
+      color: '#fff',
+      fontSize: 16,
+    },
   });
   

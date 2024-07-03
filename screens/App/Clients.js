@@ -27,9 +27,17 @@ const AddClients = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.post('https://gcnm.wigal.com.gh/getCustomers', {
-          agent_id: "2",
-        });
+        const response = await axios.post(
+          'https://gcnm.wigal.com.gh/getCustomers',
+          {
+            agent_id: "2",
+          },
+          {
+            headers: {
+              'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+            },
+          }
+        );
         console.log('API response:', response.data);
         setClients(response.data.data || []);
       } catch (error) {
@@ -38,6 +46,7 @@ const AddClients = () => {
         setLoading(false);
       }
     };
+    
 
     fetchClients();
   }, []);

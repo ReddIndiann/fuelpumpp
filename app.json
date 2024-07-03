@@ -15,7 +15,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.tornyelli.tornyelliapp",
+      "package": "com.fuelsystem.fuelsystem",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -26,7 +26,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "6ae46aa8-460c-46bf-aaae-acb785097f49"
+        "projectId": "39ce719f-8f77-40ab-9505-50b85d12019f"
       }
     }
   }

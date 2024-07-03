@@ -41,12 +41,20 @@ const ExistingClientTransaction = () => {
 
   const closeAccount = async () => {
     try {
-      const response = await axios.post('https://gcnm.wigal.com.gh/closingingaccount', {
-        client_id: client.id,
-        customer_id: client.customerId,
-        location_id: client.locationId,
-        paymentoption: "MTN",
-      });
+      const response = await axios.post(
+        'https://gcnm.wigal.com.gh/closingingaccount',
+        {
+          client_id: client.id,
+          customer_id: client.customerId,
+          location_id: client.locationId,
+          paymentoption: "MTN",
+        },
+        {
+          headers: {
+            'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+          },
+        }
+      );
       if (response.status === 200) {
         Alert.alert('Success', 'Account closed successfully');
         navigation.navigate('Main');
@@ -57,6 +65,7 @@ const ExistingClientTransaction = () => {
       Alert.alert('Error', 'Failed to close account');
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>

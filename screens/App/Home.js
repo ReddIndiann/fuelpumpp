@@ -7,23 +7,23 @@ const Home = () => {
 
   const backgrounds = [
     {
-      img: require('./dashback1.png'),
+      img: require('../../assets/dashback1.png'),       
       icontext: "Fuel Sold",
       cur: "GHS",
       value: "25,000.40",
     },
     {
-       img: require('./dashback2.png'),
+      img: require('../../assets/dashback2.png'), 
       icontext: "Stock Records",
       value: 123456789,
     },
     {
-       img: require('./dashback4.png'),
+      img: require('../../assets/dashback4.png'), 
       icontext: "Existing Users",
       value: 123456789,
     },
     {
-       img: require('./dashback5.png'),
+      img: require('../../assets/dashback5.png'), 
       icontext: "New Users",
       value: 123456789,
     },

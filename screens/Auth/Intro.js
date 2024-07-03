@@ -11,7 +11,7 @@ const Intro = () => {
   const navigation = useNavigation();
   const slides = [
     {
-        img: require('./slider3.png'), 
+      img: require('../../assets/slider3.png'),  
         text1: 'Welcome to Fuel Management App',
         text2: 'Welcome! Input vehicle info for', 
         text3: 'personalized savings. Let us',
@@ -20,7 +20,7 @@ const Intro = () => {
      
     },
     {
-        img: require('./slider4.png'), // update the path to your second image
+      img: require('../../assets/slider4.png'),  // update the path to your second image
         text1: 'Track, Analyze, Save',
         text2: 'Welcome! Easily track fuel,', 
         text3: 'save money, and reduce',
@@ -29,7 +29,7 @@ const Intro = () => {
       
     },
     {
-      img: require('./slider5.png'), // update the path to your second image
+      img: require('../../assets/slider3.png'), // update the path to your second image
       text1: 'Maximize Efficiency with \t Fuel Management App',
       text2: 'Welcome to the future of fuel', 
       text3: 'management! Get ready to',
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   swiper: {
     height: '90%',
     backgroundColor: '#fff',
-    marginTop: '30%',
+    marginTop: '10%',
   },
   slide: {
     alignItems: 'center',

@@ -11,26 +11,23 @@ import {
   Keyboard,
   ScrollView,
   Pressable,
-  Modal,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios'; // Import axios
-import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AuthContext from '../../hooks/useAuthContext';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('');
+const LoginPage = ({ navigation }) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const { setUser } = useContext(AuthContext);
 
-  const navigateToScreen = useNavigateToScreen();
   const { width } = useWindowDimensions();
-
   const isTablet = width >= 768;
 
   const togglePasswordVisibility = () => {
@@ -39,36 +36,32 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        'https://gcnm.wigal.com.gh/api/login',
-        {
-          email: email,
-          password: password,
+      const response = await axios.post('https://gcnm.wigal.com.gh/login', {
+        username,
+        password,
+      }, {
+        headers: {
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
         },
-        {
-          headers: {
-            'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
-          },
-        }
-      );
+      });
+
       if (response.status === 200) {
-        Alert.alert('Success', 'Login successful');
-        navigateToScreen('Main'); // Assuming 'Main' is your main screen after login
-      } else {
-        Alert.alert('Error', 'Failed to log in');
+        const userData = response.data.data;
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);  // Set user in context
+        Alert.alert('Success', 'Login successful!', [
+          { text: 'OK', onPress: () => navigation.navigate('BottomTabs') },
+        ]);
       }
     } catch (error) {
+      console.error('Error logging in:', error.response || error.message || error);
       if (error.response) {
-        // Server responded with a status other than 200 range
-        setModalMessage(error.response.data.message || 'The password or the e-mail address is incorrect');
+        Alert.alert('Error', `Login failed. Server responded with status: ${error.response.status}`);
       } else if (error.request) {
-        // Request was made but no response was received
-        setModalMessage('No response from server. Please try again later.');
+        Alert.alert('Error', 'Login failed. No response received from server.');
       } else {
-        // Something else happened
-        setModalMessage('An error occurred. Please try again.');
+        Alert.alert('Error', `Login failed. Error: ${error.message}`);
       }
-      setIsModalVisible(true);
     }
   };
 
@@ -87,12 +80,12 @@ const LoginPage = () => {
   }, []);
 
   useEffect(() => {
-    if (email && password) {
+    if (username && password) {
       setIsButtonEnabled(true);
     } else {
       setIsButtonEnabled(false);
     }
-  }, [email, password]);
+  }, [username, password]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -107,8 +100,8 @@ const LoginPage = () => {
           </Text>
           <TextInput
             placeholder="E-mail address"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
+            value={username}
+            onChangeText={(text) => setUsername(text)}
             style={styles.input}
             placeholderTextColor="#a0a0a0"
           />
@@ -125,7 +118,7 @@ const LoginPage = () => {
               <Icon name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="#a0a0a0" />
             </TouchableOpacity>
           </View>
-          <Pressable style={styles.forgotpassword} onPress={() => navigateToScreen('ForgetPassword')}>
+          <Pressable style={styles.forgotpassword} onPress={() => navigation.navigate('ForgetPassword')}>
             <Text style={styles.forgotpassword}>Forgot password?</Text>
           </Pressable>
           <View style={[styles.buttonContainer, keyboardOpen && styles.buttonContainerKeyboardOpen]}>
@@ -138,31 +131,12 @@ const LoginPage = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button1, isTablet && styles.tabletButton1]}
-              onPress={() => navigateToScreen('onBoard')}
             >
               <Text style={styles.signUpText}>Sign up with Google</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => {
-          setIsModalVisible(!isModalVisible);
-        }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <TouchableOpacity style={styles.modalIconContainer} onPress={() => setIsModalVisible(false)}>
-              <Icon name="close" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.modalMessage}>{modalMessage}</Text>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -273,45 +247,5 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     fontSize: 17,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 300,
-  },
-  modalContainer: {
-    width: '90%',
-    marginRight: 10,
-    backgroundColor: '#D32F2F',
-    borderRadius: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    padding: 10,
-  },
-  modalIconContainer: {
-    width: '15%',
-    alignItems: 'center',
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#D32F2F',
-    borderRadius: 5,
-  },
-  modalMessage: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  modalButton: {
-    width: '100%',
-    padding: 10,
-    backgroundColor: '#007B5D',
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontSize: 16,
   },
 });

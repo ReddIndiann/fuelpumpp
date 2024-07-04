@@ -12,10 +12,13 @@ import {
   Keyboard,
   ScrollView,
   Modal,
+  Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ModalDropdown from 'react-native-modal-dropdown';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const Clients = () => {
   const [name, setName] = useState('');
@@ -31,6 +34,7 @@ const Clients = () => {
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const navigation = useNavigation();
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -42,7 +46,7 @@ const Clients = () => {
 
     return () => {
       keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove(); 
+      keyboardDidShowListener.remove();
     };
   }, []);
 
@@ -52,17 +56,35 @@ const Clients = () => {
 
   const handleAddClient = async () => {
     try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(savedUser);
+      const userId = user?.id; // Adjust this based on your user object structure
+      console.log('User ID:', userId);
+
+      if (!userId) {
+        throw new Error('User ID not found');
+      }
+
       const response = await axios.post('https://gcnm.wigal.com.gh/savecustomer', {
         name,
         email,
         phonenumber: phoneNumber,
         alternative_phonenumber: alternativePhoneNumber,
         id_card_type: idCardType,
-        agent_id: "2",
+        agent_id: userId,
         id_card_number: idCardNumber,
         wallet_number: walletNumber
       });
       console.log('Data posted successfully:', response.data);
+
+      Alert.alert(
+        'Success',
+        'Customer added successfully',
+        [
+          { text: 'OK', onPress: () => navigation.navigate('Client') }
+        ]
+      );
+
     } catch (error) {
       console.error('Error posting data:', error);
       setIsModalVisible(true);

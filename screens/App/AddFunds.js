@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -15,29 +15,49 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ModalDropdown from 'react-native-modal-dropdown';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AddFunds = ({ route }) => {
+const AddFunds = ({ route, navigation }) => {
   const { client } = route.params; // Get client data from navigation params
 
   const [amount, setAmount] = useState('');
-  const [wallet, setWallet] = useState('');
-  const [paymentOption, setPaymentOption] = useState('');
+  const [agentId, setAgentId] = useState('');
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
-  const handleAddFunds = () => {
-    const data = {
-      agent_id: '2',
-      customer_id: '26', // Replace with actual IDs or fetch from client data
-      amount: amount,
-      wallet: wallet,
-      paymentoptionload: paymentOption,
+  useEffect(() => {
+    const fetchAgentId = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem('user');
+        const user = JSON.parse(savedUser);
+        setAgentId(user?.id); // Adjust this based on your user object structure
+      } catch (error) {
+        console.error('Failed to fetch agent ID:', error);
+      }
     };
 
-    axios.post('https://gcnm.wigal.com.gh/loadfunds', data)
+    fetchAgentId();
+  }, []);
+
+  const handleAddFunds = () => {
+    const data = {
+      agent_id: agentId,
+      customer_id: client.clientid, // Fetch customer ID from client data
+      amount: amount,
+      wallet: client.wallet_number, // Fetch wallet from client data
+      paymentoption: client.payment_option, // Fetch payment option from client data
+    };
+
+    axios.post('https://gcnm.wigal.com.gh/loadfunds', data, {
+      headers: {
+        'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+      }
+    })
       .then(response => {
         // Handle success
-        Alert.alert('Success', 'Funds added successfully.');
+        Alert.alert('Success', 'Funds added successfully.', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
       })
       .catch(error => {
         // Handle error
@@ -45,7 +65,7 @@ const AddFunds = ({ route }) => {
         console.error(error);
       });
   };
-
+console.log(client.clientid)
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -61,8 +81,8 @@ const AddFunds = ({ route }) => {
               <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
-                <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
-                <Text style={styles.clientAmount}>$35,078</Text>
+                <Text style={styles.clientPhone}>{client.phonenumber}</Text>
+                <Text style={styles.clientAmount}>{client.amount}</Text>
               </View>
             </View>
           </View>
@@ -79,30 +99,6 @@ const AddFunds = ({ route }) => {
             />
           </View>
 
-          {/* Select Wallet Dropdown */}
-          <Text style={styles.label}>Select Wallet</Text>
-          <View style={styles.inputContainer}>
-            <ModalDropdown 
-              options={['3', 'Another Wallet']} 
-              style={styles.dropdown}
-              textStyle={styles.dropdownText}
-              dropdownStyle={styles.dropdownMenu}
-              onSelect={(index, value) => setWallet(value)}
-            />
-          </View>
-
-          {/* Select Payment Method Dropdown */}
-          <Text style={styles.label}>Select Payment Method</Text>
-          <View style={styles.inputContainer}>
-            <ModalDropdown 
-              options={['MTN', 'Vodafone']} 
-              style={styles.dropdown}
-              textStyle={styles.dropdownText}
-              dropdownStyle={styles.dropdownMenu}
-              onSelect={(index, value) => setPaymentOption(value)}
-            />
-          </View>
-
           {/* Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -113,6 +109,7 @@ const AddFunds = ({ route }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button1}
+              onPress={() => navigation.goBack()}
             >
               <Text style={styles.signUpText}>Cancel</Text>
             </TouchableOpacity>

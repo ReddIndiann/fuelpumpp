@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddClients = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,10 +28,19 @@ const AddClients = () => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
+        const savedUser = await AsyncStorage.getItem('user');
+        const user = JSON.parse(savedUser);
+        const userId = user?.id; // Adjust this based on your user object structure
+        console.log('User ID:', userId);
+
+        if (!userId) {
+          throw new Error('User ID not found');
+        }
+
         const response = await axios.post(
           'https://gcnm.wigal.com.gh/getCustomers',
           {
-            agent_id: "2",
+            agent_id: userId,
           },
           {
             headers: {
@@ -46,7 +56,6 @@ const AddClients = () => {
         setLoading(false);
       }
     };
-    
 
     fetchClients();
   }, []);
@@ -72,7 +81,7 @@ const AddClients = () => {
       }}
     >
       <Text style={styles.tableRowText}>{item.name}</Text>
-      <Text style={styles.tableRowText}>{item.phoneNumber}</Text>
+      <Text style={styles.tableRowText}>{item.phonenumber}</Text>
     </TouchableOpacity>
   );
 

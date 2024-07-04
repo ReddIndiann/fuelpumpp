@@ -42,7 +42,7 @@ const DispenseFuel = () => {
               <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
-                <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
+                <Text style={styles.clientPhone}>{client.phonenumber}</Text>
                 <Text style={styles.clientAmount}>$35,078</Text>
               </View>
             </View>

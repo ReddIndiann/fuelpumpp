@@ -10,10 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DispenseFuel = () => {
   const { width } = useWindowDimensions();
@@ -26,6 +29,59 @@ const DispenseFuel = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [clientsPerPage] = useState(5);
   const [productType, setProductType] = useState('');
+  const [productPrice, setProductPrice] = useState(''); // State to store product price
+  const [agentId, setAgentId] = useState(null);
+
+  useEffect(() => {
+    const fetchAgentId = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem('user');
+        const user = JSON.parse(savedUser);
+        setAgentId(user?.id); // Adjust this based on your user object structure
+      } catch (error) {
+        console.error('Failed to fetch agent ID:', error);
+      }
+    };
+
+    fetchAgentId();
+  }, []);
+
+  const fetchProductPrice = async (productId) => {
+    if (!agentId) {
+      Alert.alert('Error', 'Agent ID not found.');
+      return;
+    }
+
+    const payload = {
+      agent_id: '2',
+      product_id: productId
+    };
+
+    try {
+      const response = await axios.post('https://gcnm.wigal.com.gh/getproductprice', payload, {
+        headers: {
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv','Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data && response.data.price) {
+        setProductPrice(response.data.price);
+      } else {
+        console.error('Invalid response from server:', response.data);
+        Alert.alert('Error', 'Failed to fetch product price.');
+      }
+    } catch (error) {
+      console.error('Failed to fetch product price:', error);
+      Alert.alert('Error', 'Failed to fetch product price.');
+    }
+  };
+
+  const handleProductTypeSelect = (index, value) => {
+    setProductType(value);
+    // Assuming product IDs are mapped to product types, e.g., "Product 1" -> 47
+    const productId = value === 'Product 1' ? '47' : '48'; // Adjust as necessary
+    fetchProductPrice(productId);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,11 +110,11 @@ const DispenseFuel = () => {
           
           <View style={styles.inputContainer}>
             <ModalDropdown
-              options={['Product 1', 'Product 2']}
+              options={['47', 'Product 2']}
               style={styles.dropdown}
               textStyle={styles.dropdownText}
               dropdownStyle={styles.dropdownMenu}
-              onSelect={(index, value) => setProductType(value)}
+              onSelect={handleProductTypeSelect}
               defaultValue="Select your product type"
             />
             <TouchableOpacity>
@@ -70,7 +126,7 @@ const DispenseFuel = () => {
           <View style={styles.passwordContainer}>
             <TextInput
               placeholder="Price per litre"
-              value="1.50" // Set the default value as needed
+              value={productPrice} // Use fetched price
               editable={false}
               style={[styles.inputt, styles.readOnlyInput, { flex: 1, borderColor: '#FFFFFF' }]}
               placeholderTextColor="#a0a0a0"

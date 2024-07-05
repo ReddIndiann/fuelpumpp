@@ -16,7 +16,7 @@ import StockRecords from "../screens/App/StockRecords";
 import ProductSupply from "../screens/App/Productsupply";
 
 import AddClients from "../screens/App/AddClient";
-import RedrawFund from "../screens/App/RedrawFund";
+import RedrawFund from "../screens/App/WithdrawFund";
 import ExistingClientTransaction from "../screens/App/ExistingClientTransaction";
 import AuthStack from './AuthStack';
 const Stack = createStackNavigator();

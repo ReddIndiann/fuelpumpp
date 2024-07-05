@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -14,6 +14,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ModalDropdown from 'react-native-modal-dropdown';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProductSupply = () => {
   const [vehicleArrivalDate, setVehicleArrivalDate] = useState(new Date());
@@ -25,9 +27,25 @@ const ProductSupply = () => {
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState(null);
+  const [agentId, setAgentId] = useState(null);
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  useEffect(() => {
+    const fetchAgentId = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem('user');
+        const user = JSON.parse(savedUser);
+        setAgentId(user?.id); // Adjust this based on your user object structure
+      } catch (error) {
+        console.error('Failed to fetch agent ID:', error);
+      }
+    };
+
+    fetchAgentId();
+  }, []);
+
 
   const handleVehicleArrivalDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || vehicleArrivalDate;
@@ -43,6 +61,33 @@ const ProductSupply = () => {
 
   const handleProductTypeSelect = (index, value) => {
     setSelectedProductType(value);
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await axios.post(
+        'https://gcnm.wigal.com.gh/productsupply',
+        {
+          agent_id: agentId,
+          product_id: selectedProductType === 'Product 1' ? '1' : '2',
+          arrival_date: vehicleArrivalDate.toLocaleDateString(),
+          delivered_quantity: quantityDelivered,
+          vehicle_number: vehicleNumber,
+          driver_name: driverName,
+          driver_number: driverNumber
+        },
+        {
+          headers: {
+            'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+          }
+        }
+      );
+      console.log('Product supply saved successfully:', response.data);
+      // Handle success (e.g., show a success message or navigate to another screen)
+    } catch (error) {
+      console.error('Error saving product supply:', error);
+      // Handle error (e.g., show an error message)
+    }
   };
 
   return (
@@ -162,7 +207,7 @@ const ProductSupply = () => {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, isTablet && styles.tabletButton]}
-              onPress={() => alert('Save button pressed')} // Replace with your save functionality
+              onPress={handleSave}
             >
               <Text style={styles.signInText}>Save</Text>
             </TouchableOpacity>
@@ -217,7 +262,8 @@ const styles = StyleSheet.create({
   datePickerText: {
     fontSize: 18,
     color: '#000',
-  }, inputContainer: {
+  },
+  inputContainer: {
     width: '90%',
     height: 50,
     borderRadius: 10,
@@ -239,7 +285,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007B5D',
     borderWidth: 1,
     justifyContent: 'center',
-    marginBottom:60,
+    marginBottom: 60,
     borderRadius: 10,
     marginRight: 20,
     alignItems: 'center',

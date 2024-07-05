@@ -1,4 +1,4 @@
-import React from 'react';
+
 import {
   StyleSheet,
   SafeAreaView,
@@ -14,13 +14,14 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
 const ExistingClientTransaction = () => {
   const { width } = useWindowDimensions();
   const navigation = useNavigation();
   const route = useRoute();
   const { client } = route.params;
-
+  const [agentId, setAgentId] = useState('');
   const handleCloseAccount = () => {
     Alert.alert(
       'Confirm Account Closure',
@@ -39,15 +40,28 @@ const ExistingClientTransaction = () => {
     );
   };
 
+  useEffect(() => {
+    const fetchAgentId = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem('user');
+        const user = JSON.parse(savedUser);
+        setAgentId(user?.id); // Adjust this based on your user object structure
+      } catch (error) {
+        console.error('Failed to fetch agent ID:', error);
+      }
+    };
+
+    fetchAgentId();
+  }, []);
+
   const closeAccount = async () => {
     try {
       const response = await axios.post(
         'https://gcnm.wigal.com.gh/closingingaccount',
         {
-          client_id: client.id,
+          agent_id: agentId,
           customer_id: client.customerId,
-          location_id: client.locationId,
-          paymentoption: "MTN",
+     
         },
         {
           headers: {

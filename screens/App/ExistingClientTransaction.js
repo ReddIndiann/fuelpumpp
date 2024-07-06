@@ -1,4 +1,3 @@
-
 import {
   StyleSheet,
   SafeAreaView,
@@ -16,12 +15,15 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
+
 const ExistingClientTransaction = () => {
   const { width } = useWindowDimensions();
   const navigation = useNavigation();
   const route = useRoute();
   const { client } = route.params;
   const [agentId, setAgentId] = useState('');
+  const [balance, setBalance] = useState('0'); // Initial balance state
+
   const handleCloseAccount = () => {
     Alert.alert(
       'Confirm Account Closure',
@@ -51,8 +53,32 @@ const ExistingClientTransaction = () => {
       }
     };
 
+    const fetchBalance = async () => {
+      try {
+        const response = await axios.post(
+          'https://gcnm.wigal.com.gh/getcustomerbalance',
+          { customer_id: client.customerId },
+          {
+            headers: {
+              'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+            },
+          }
+        );
+        if (response.status === 200 && response.data.statuscode === '00') {
+          setBalance(response.data.data.total_amount); // Update balance state
+        } else {
+          setBalance('0'); // Show 0 if customer has no account
+        }
+      } catch (error) {
+        console.error('Failed to fetch balance:', error);
+        setBalance('0'); // Show 0 in case of an error
+        Alert.alert('Error', 'Failed to fetch balance');
+      }
+    };
+
     fetchAgentId();
-  }, []);
+    fetchBalance();
+  }, [client.customerId]);
 
   const closeAccount = async () => {
     try {
@@ -61,7 +87,6 @@ const ExistingClientTransaction = () => {
         {
           agent_id: agentId,
           customer_id: client.customerId,
-     
         },
         {
           headers: {
@@ -71,7 +96,7 @@ const ExistingClientTransaction = () => {
       );
       if (response.status === 200) {
         Alert.alert('Success', 'Account closed successfully');
-        navigation.navigate('Main');
+        navigation.navigate('Client');
       } else {
         Alert.alert('Error', 'Failed to close account');
       }
@@ -79,7 +104,6 @@ const ExistingClientTransaction = () => {
       Alert.alert('Error', 'Failed to close account');
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,7 +113,7 @@ const ExistingClientTransaction = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Existing Client Transactions</Text>
-          
+
           {/* Client Information Card */}
           <View style={styles.clientCard}>
             <View style={styles.clientCardHeader}>
@@ -97,7 +121,7 @@ const ExistingClientTransaction = () => {
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
                 <Text style={styles.clientPhone}>{client.phonenumber}</Text>
-                <Text style={styles.clientAmount}>$35,078</Text> 
+                <Text style={styles.clientAmount}> gh₵ {balance}</Text> 
               </View>
             </View>
           </View>
@@ -176,6 +200,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 40,
     marginRight: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   clientName: {
     fontSize: 18,

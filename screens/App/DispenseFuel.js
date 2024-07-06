@@ -23,11 +23,13 @@ const DispenseFuel = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { client } = route.params; // Retrieve client data from route parameters
+  const [balance, setBalance] = useState('0'); // Initial balance state
 
   const [searchQuery, setSearchQuery] = useState('');
   const [quantity, setQuantity] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [clientsPerPage] = useState(5);
+  const [products, setProducts] = useState([]);
   const [productType, setProductType] = useState('');
   const [pricePerLitre, setPricePerLitre] = useState('');
   const [amount, setAmount] = useState('');
@@ -44,38 +46,70 @@ const DispenseFuel = () => {
       }
     };
 
+    const fetchBalance = async () => {
+      try {
+        const response = await axios.post(
+          'https://gcnm.wigal.com.gh/getcustomerbalance',
+          { customer_id: client.customerId },
+          {
+            headers: {
+              'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+            },
+          }
+        );
+        if (response.status === 200 && response.data.statuscode === '00') {
+          setBalance(response.data.data.total_amount); // Update balance state
+        } else {
+          setBalance('0'); // Show 0 if customer has no account
+        }
+      } catch (error) {
+        console.error('Failed to fetch balance:', error);
+        setBalance('0'); // Show 0 in case of an error
+        Alert.alert('Error', 'Failed to fetch balance');
+      }
+    };
+
     fetchAgentId();
-  }, []);
+    fetchBalance();
+  }, [client.customerId]);
 
   useEffect(() => {
-    if (productType) {
-      fetchProductPrice();
+    if (agentId) {
+      fetchProducts();
     }
-  }, [productType]);
+  }, [agentId]);
 
-  const fetchProductPrice = async () => {
+  const fetchProducts = async () => {
     try {
-      const response = await fetch('https://gcnm.wigal.com.gh/getproductprice', {
+      const response = await fetch('https://gcnm.wigal.com.gh/clientproducts', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
         },
         body: JSON.stringify({
           agent_id: agentId,
-          product_id: '47', // Update this with the relevant product ID
         }),
       });
 
       const data = await response.json();
       if (data.statuscode === '00') {
-        setPricePerLitre(data.data[0].price);
+        setProducts(data.data);
       } else {
-        console.error('Failed to fetch product price:', data.message);
+        console.error('Failed to fetch products:', data.message);
       }
     } catch (error) {
-      console.error('Error fetching product price:', error);
+      console.error('Error fetching products:', error);
     }
   };
+
+  useEffect(() => {
+    if (productType) {
+      const selectedProduct = products.find(product => product.product_name === productType);
+      if (selectedProduct) {
+        setPricePerLitre(selectedProduct.price);
+      }
+    }
+  }, [productType, products]);
 
   useEffect(() => {
     calculateAmount();
@@ -108,7 +142,7 @@ const DispenseFuel = () => {
           product_id: '47', // Update this with the relevant product ID
           price: pricePerLitre,
           quantity,
-          amount:'0',
+          amount: '0',
         }),
       });
 
@@ -124,7 +158,7 @@ const DispenseFuel = () => {
       Alert.alert('Error', 'An error occurred while dispensing fuel.');
     }
   };
-console.log(client.id)
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -140,8 +174,8 @@ console.log(client.id)
               <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
-                <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
-                <Text style={styles.clientAmount}>$35,078</Text>
+                <Text style={styles.clientPhone}>{client.phonenumber}</Text>
+                <Text style={styles.clientAmount}>gh₵{balance}</Text>
               </View>
             </View>
           </View>
@@ -152,7 +186,7 @@ console.log(client.id)
           
           <View style={styles.inputContainer}>
             <ModalDropdown
-              options={['Product 1', 'Product 2']}
+              options={products.map(product => product.product_name)}
               style={styles.dropdown}
               textStyle={styles.dropdownText}
               dropdownStyle={styles.dropdownMenu}

@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WithdrawFunds = ({ route, navigation }) => {
   const { client } = route.params; // Get client data from navigation params
+  const [balance, setBalance] = useState('0'); // Initial balance state
 
   const [amount, setAmount] = useState('');
   const [agentId, setAgentId] = useState('');
@@ -35,8 +36,32 @@ const WithdrawFunds = ({ route, navigation }) => {
       }
     };
 
+    const fetchBalance = async () => {
+      try {
+        const response = await axios.post(
+          'https://gcnm.wigal.com.gh/getcustomerbalance',
+          { customer_id: client.customerId },
+          {
+            headers: {
+              'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+            },
+          }
+        );
+        if (response.status === 200 && response.data.statuscode === '00') {
+          setBalance(response.data.data.total_amount); // Update balance state
+        } else {
+          setBalance('0'); // Show 0 if customer has no account
+        }
+      } catch (error) {
+        console.error('Failed to fetch balance:', error);
+        setBalance('0'); // Show 0 in case of an error
+        Alert.alert('Error', 'Failed to fetch balance');
+      }
+    };
+
     fetchAgentId();
-  }, []);
+    fetchBalance();
+  }, [client.customerId]);
 
   const handleWithdraw = async () => {
     try {
@@ -76,8 +101,8 @@ const WithdrawFunds = ({ route, navigation }) => {
               <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
-                <Text style={styles.clientPhone}>{client.phoneNumber}</Text>
-                <Text style={styles.clientAmount}>{client.amount}</Text>
+                <Text style={styles.clientPhone}>{client.phonenumber}</Text>
+                <Text style={styles.clientAmount}>gh₵ {balance}</Text>
               </View>
             </View>
           </View>
@@ -234,6 +259,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     marginVertical: 20,
-    marginTop: 150,
+    marginTop: 240,
   },
 });

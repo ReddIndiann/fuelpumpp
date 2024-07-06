@@ -30,8 +30,7 @@ const AddClients = () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
-        const userId = user?.id; // Adjust this based on your user object structure
-        console.log('User ID:', userId);
+        const userId = user?.id;
 
         if (!userId) {
           throw new Error('User ID not found');
@@ -48,7 +47,6 @@ const AddClients = () => {
             },
           }
         );
-        console.log('API response:', response.data);
         setClients(response.data.data || []);
       } catch (error) {
         console.error('Error fetching clients:', error);
@@ -61,7 +59,6 @@ const AddClients = () => {
   }, []);
 
   const handleSearch = (text) => {
-    console.log('Search query:', text);
     setSearchQuery(text);
   };
 
@@ -70,18 +67,13 @@ const AddClients = () => {
     client.phoneNumber.includes(searchQuery)
   );
 
-  console.log('Filtered clients:', filteredClients);
-
   const renderClient = ({ item }) => (
     <TouchableOpacity
-      style={styles.tableRow}
-      onPress={() => {
-        console.log('Navigating to ExistingClientTransaction with client:', item);
-        navigation.navigate('existingclienttransaction', { client: item });
-      }}
+      style={styles.card}
+      onPress={() => navigation.navigate('existingclienttransaction', { client: item })}
     >
-      <Text style={styles.tableRowText}>{item.name}</Text>
-      <Text style={styles.tableRowText}>{item.phonenumber}</Text>
+      <Text style={styles.cardText}>{item.name}</Text>
+      <Text style={styles.cardText}>{item.phonenumber}</Text>
     </TouchableOpacity>
   );
 
@@ -127,6 +119,7 @@ const AddClients = () => {
               renderItem={renderClient}
               keyExtractor={(item, index) => index.toString()}
               style={styles.flatList}
+              contentContainerStyle={styles.flatListContent}
             />
           </View>
         </ScrollView>
@@ -197,42 +190,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  tableRow: {
+  card: {
     flexDirection: 'row',
+    backgroundColor: '#fff',
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  tableRowText: {
+  cardText: {
     flex: 1,
     fontSize: 16,
   },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
+  flatList: {
+    flexGrow: 0,
   },
-  paginationButton: {
-    marginHorizontal: 5,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  activePaginationButton: {
-    backgroundColor: '#007B5D',
-  },
-  paginationButtonText: {
-    fontSize: 16,
-  },
-  activePaginationButtonText: {
-    color: '#fff',
+  flatListContent: {
+    borderTopWidth: 0, // remove the top border from the first item
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  flatList: {
-    flexGrow: 0,
   },
 });

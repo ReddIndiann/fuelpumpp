@@ -98,7 +98,7 @@ const AddClients = () => {
           </Text>
           <View style={styles.headerContainer}>
             <Text style={styles.label}>Existing Clients</Text>
-            <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('addclient')}>
+            <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('AddClient')}>
               <Text style={styles.addClientButtonText}>Add New Client</Text>
             </TouchableOpacity>
           </View>
@@ -174,10 +174,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tableContainer: {
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    borderRadius: 10,
-    overflow: 'hidden',
     marginBottom: 20,
   },
   tableHeader: {
@@ -194,8 +190,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   cardText: {
     flex: 1,
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   flatListContent: {
-    borderTopWidth: 0, // remove the top border from the first item
+    paddingBottom: 10,
   },
   loadingContainer: {
     flex: 1,

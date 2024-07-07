@@ -25,10 +25,11 @@ const StockRecords = () => {
   const [dippingTime, setDippingTime] = useState(new Date());
   const [showDippingTimePicker, setShowDippingTimePicker] = useState(false);
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
-  const [productType, setProductType] = useState(null);
+  const [selectedProductType, setSelectedProductType] = useState(null);
   const [dippingQuantity, setDippingQuantity] = useState('');
   const [dispenserQuantity, setDispenserQuantity] = useState('');
   const [agentId, setAgentId] = useState(null);
+  const [products, setProducts] = useState([]);
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -39,6 +40,9 @@ const StockRecords = () => {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
         setAgentId(user?.id); // Adjust this based on your user object structure
+        if (user?.id) {
+          fetchProducts(user.id);
+        }
       } catch (error) {
         console.error('Failed to fetch agent ID:', error);
       }
@@ -47,6 +51,29 @@ const StockRecords = () => {
     fetchAgentId();
   }, []);
 
+  const fetchProducts = async (agentId) => {
+    try {
+      const response = await fetch('https://gcnm.wigal.com.gh/clientproducts', {
+        method: 'POST',
+        headers: {
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+        },
+        body: JSON.stringify({
+          agent_id: agentId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.statuscode === '00') {
+        setProducts(data.data);
+        console.log('Fetched products:', data.data); // Log the fetched products
+      } else {
+        console.error('Failed to fetch products:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
 
   const handleVehicleArrivalDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || vehicleArrivalDate;
@@ -60,6 +87,10 @@ const StockRecords = () => {
     setDippingTime(currentTime);
   };
 
+  const handleProductTypeSelect = (index, value) => {
+    setSelectedProductType(value);
+  };
+
   const handleSubmit = () => {
     if (!agentId) {
       Alert.alert('Error', 'Agent ID not found.');
@@ -69,7 +100,7 @@ const StockRecords = () => {
     const payload = {
       agent_id: agentId,
       location_id: "3",
-      product_id: productType,
+      product_id: selectedProductType,
       record_date: vehicleArrivalDate.toISOString().split('T')[0],
       dipping_time: dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       dipping_quantity: dippingQuantity,
@@ -105,11 +136,11 @@ const StockRecords = () => {
           <Text style={styles.label}>Select Product Type</Text>
           <View style={styles.inputContainer}>
             <ModalDropdown
-              options={['Product 1', 'Product 2']}
-              onSelect={(index, value) => setProductType(value)}
-              dropdownTextStyle={styles.dropdownTextStyle}
-              dropdownStyle={styles.dropdownStyle}
+              options={products.map(product => product.product_name)}
+              onSelect={(index, value) => handleProductTypeSelect(index, value)}
               textStyle={styles.dropdownText}
+              dropdownTextStyle={styles.dropdownOptionText}
+              dropdownStyle={styles.dropdownContainer}
               defaultValue={'Select your product type'}
             />
           </View>
@@ -128,6 +159,7 @@ const StockRecords = () => {
               value={vehicleArrivalDate}
               mode="date"
               display="default"
+              minimumDate={new Date()}
               onChange={handleVehicleArrivalDateChange}
             />
           )}
@@ -270,21 +302,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#000',
   },
-  dropdownTextStyle: {
+  dropdownText: {
     fontSize: 18,
     color: '#000',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
   },
-  dropdownStyle: {
+  dropdownOptionText: {
+    fontSize: 18,
+    paddingLeft: 15,
+    paddingVertical: 10,
+  },
+  dropdownContainer: {
     width: '90%',
     borderColor: '#a0a0a0',
     borderWidth: 1,
     borderRadius: 10,
-  },
-  dropdownText: {
-    fontSize: 18,
-    color: '#000',
-    textAlign: 'center',
+    marginTop: 10,
   },
 });

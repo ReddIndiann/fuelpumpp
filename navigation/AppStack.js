@@ -28,14 +28,14 @@ const AppStack = () => {
       <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ headerShown: false }} />
       <Stack.Screen name="AddReminder" component={AddReminder} options={{ headerShown: false }}/>
       <Stack.Screen name="UserProfile" component={UserProfile} />
-      <Stack.Screen name="profile" component={Profile} options={{ headerShown: false }} />
+      <Stack.Screen name="profile" component={Profile} options={{ headerShown: true }} />
       <Stack.Screen name="productsupply" component={ProductSupply} options={{ headerShown: false }}/>
       <Stack.Screen name="stockrecords" component={StockRecords} />
       <Stack.Screen name="addclient" component={AddClients} options={{ headerShown: false }} />
-      <Stack.Screen name="existingclienttransaction" component={ExistingClientTransaction} options={{ headerShown: false }}/>
-      <Stack.Screen name="dispensefuel" component={DispenseFuel} />
-      <Stack.Screen name="addfunds" component={AddFunds} options={{ headerShown: false }} />
-      <Stack.Screen name="redrawfund" component={RedrawFund} options={{ headerShown: false }}/>
+      <Stack.Screen name="existingclienttransaction" component={ExistingClientTransaction} options={{ headerShown: true }}/>
+      <Stack.Screen name="dispensefuel" component={DispenseFuel} options={{ headerShown: true }} />
+      <Stack.Screen name="addfunds" component={AddFunds} options={{ headerShown: true }} />
+      <Stack.Screen name="redrawfund" component={RedrawFund} options={{ headerShown: true }}/>
 
     </Stack.Navigator>
   );

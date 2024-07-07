@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-import { TouchableOpacity, View, StyleSheet, Animated, Text } from 'react-native';
+import React, { useContext } from 'react';
+import { TouchableOpacity, View, StyleSheet, Animated, Text, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../screens/App/Home';
 import Record from '../screens/App/Records';
@@ -12,19 +12,51 @@ import ProductSupply from '../screens/App/Productsupply';
 import StockRecords from '../screens/App/StockRecords';
 import Clients from '../screens/App/AddClient';
 import ExistingClientTransaction from '../screens/App/ExistingClientTransaction';
-
-import { useNavigateToScreen } from '../hooks/useNavigateToScreen';
+import AuthContext from '../hooks/useAuthContext';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Tab = createBottomTabNavigator();
 
 const AppTabs = () => {
+  const { logout } = useContext(AuthContext); // Use the logout function from context
   const navigation = useNavigation();
-  const navToProfile = () => {
-    navigation.navigate('profile');
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post('https://gcnm.wigal.com.gh/apilogout', {}, {
+        headers: {
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+        },
+      });
+
+      if (response.status === 200) {
+        await AsyncStorage.clear();
+        logout();
+        Alert.alert('Success', 'Logged out successfully!', [
+          { text: 'OK', onPress: () => navigation.navigate('AuthStack') },
+        ]);
+      } else {
+        Alert.alert('Error', 'Failed to log out. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error.response || error.message || error);
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+    }
   };
+
   const navToNotification = () => {
-    navigation.navigate('profile');
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: handleLogout },
+      ],
+      { cancelable: false }
+    );
   };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -73,10 +105,9 @@ const AppTabs = () => {
           headerTransparent: false,
           headerLeft: () => (
             <View style={{ marginLeft: 10 }}>
-               <TouchableOpacity onPress={navToProfile} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 30, justifyContent: "center", alignItems: "center" }}>
-              <Ionicons name="person-outline" size={24} color="black" />
-            </TouchableOpacity>
-             
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 30, justifyContent: "center", alignItems: "center" }}>
+                <Ionicons name="person-outline" size={24} color="black" />
+              </TouchableOpacity>
             </View>
           ),
           headerTitle: () => (
@@ -91,7 +122,7 @@ const AppTabs = () => {
           ),
           headerRight: () => (
             <TouchableOpacity onPress={navToNotification} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 7, justifyContent: "center", alignItems: "center" }}>
-              <Ionicons name="notifications-outline" size={24} color="black" />
+              <Ionicons name="log-out-outline" size={24} color="black" />
             </TouchableOpacity>
           ),
           headerTitleAlign: 'center',
@@ -115,8 +146,8 @@ const AppTabs = () => {
      
       <Tab.Screen name="Client" component={AddClients} />
       
-     
     </Tab.Navigator>
   );
 };
+
 export default AppTabs;

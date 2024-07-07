@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -28,7 +29,7 @@ const ProductSupply = () => {
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState(null);
   const [agentId, setAgentId] = useState(null);
-
+  const [products, setProducts] = useState([]);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -38,6 +39,9 @@ const ProductSupply = () => {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
         setAgentId(user?.id); // Adjust this based on your user object structure
+        if (user?.id) {
+          fetchProducts(user.id);
+        }
       } catch (error) {
         console.error('Failed to fetch agent ID:', error);
       }
@@ -45,7 +49,6 @@ const ProductSupply = () => {
 
     fetchAgentId();
   }, []);
-
 
   const handleVehicleArrivalDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || vehicleArrivalDate;
@@ -61,6 +64,30 @@ const ProductSupply = () => {
 
   const handleProductTypeSelect = (index, value) => {
     setSelectedProductType(value);
+  };
+
+  const fetchProducts = async (agentId) => {
+    try {
+      const response = await fetch('https://gcnm.wigal.com.gh/clientproducts', {
+        method: 'POST',
+        headers: {
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+        },
+        body: JSON.stringify({
+          agent_id: agentId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.statuscode === '00') {
+        setProducts(data.data);
+        console.log('Fetched products:', data.data); // Log the fetched products
+      } else {
+        console.error('Failed to fetch products:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
   };
 
   const handleSave = async () => {
@@ -83,10 +110,10 @@ const ProductSupply = () => {
         }
       );
       console.log('Product supply saved successfully:', response.data);
-      // Handle success (e.g., show a success message or navigate to another screen)
+      Alert.alert('Success', 'Product supply saved successfully');
     } catch (error) {
       console.error('Error saving product supply:', error);
-      // Handle error (e.g., show an error message)
+      Alert.alert('Error', 'Failed to save product supply');
     }
   };
 
@@ -105,7 +132,7 @@ const ProductSupply = () => {
           <Text style={styles.label}>Select Product Type</Text>
           <View style={styles.inputContainer}>
             <ModalDropdown
-              options={['Product 1', 'Product 2']}
+              options={products.map(product => product.product_name)}
               onSelect={(index, value) => handleProductTypeSelect(index, value)}
               textStyle={styles.dropdownText}
               dropdownTextStyle={styles.dropdownOptionText}
@@ -136,6 +163,7 @@ const ProductSupply = () => {
               mode="date"
               display="default"
               onChange={handleVehicleArrivalDateChange}
+              minimumDate={new Date()}
             />
           )}
 
@@ -155,6 +183,7 @@ const ProductSupply = () => {
               mode="date"
               display="default"
               onChange={handleDeliveryDateChange}
+              minimumDate={new Date()}
             />
           )}
 

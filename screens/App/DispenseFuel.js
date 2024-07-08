@@ -34,6 +34,7 @@ const DispenseFuel = () => {
   const [pricePerLitre, setPricePerLitre] = useState('');
   const [amount, setAmount] = useState('');
   const [agentId, setAgentId] = useState(null);
+  const [inputType, setInputType] = useState(''); // New state for tracking input type
 
   useEffect(() => {
     const fetchAgentId = async () => {
@@ -63,9 +64,9 @@ const DispenseFuel = () => {
           setBalance('0'); // Show 0 if customer has no account
         }
       } catch (error) {
-        console.error('Failed to fetch balance:', error);
+      
         setBalance('0'); // Show 0 in case of an error
-        Alert.alert('Error', 'Failed to fetch balance');
+       
       }
     };
 
@@ -113,14 +114,15 @@ const DispenseFuel = () => {
 
   useEffect(() => {
     calculateAmount();
-  }, [quantity, pricePerLitre]);
+  }, [quantity, amount, pricePerLitre]);
 
   const calculateAmount = () => {
-    if (quantity && pricePerLitre) {
+    if (inputType === 'quantity' && quantity && pricePerLitre) {
       const calculatedAmount = (parseFloat(quantity) * parseFloat(pricePerLitre)).toFixed(2);
       setAmount(calculatedAmount);
-    } else {
-      setAmount('');
+    } else if (inputType === 'amount' && amount && pricePerLitre) {
+      const calculatedQuantity = (parseFloat(amount) / parseFloat(pricePerLitre)).toFixed(2);
+      setQuantity(calculatedQuantity);
     }
   };
 
@@ -218,7 +220,10 @@ const DispenseFuel = () => {
             <TextInput
               placeholder="Enter quantity"
               value={quantity}
-              onChangeText={(text) => setQuantity(text)}
+              onChangeText={(text) => {
+                setInputType('quantity');
+                setQuantity(text);
+              }}
               style={[styles.inputt, { flex: 1, borderColor: '#FFFFFF' }]}
               keyboardType='numeric'
               placeholderTextColor="#a0a0a0"
@@ -233,231 +238,127 @@ const DispenseFuel = () => {
             <TextInput
               placeholder="Amount"
               value={amount}
-              editable={false}
-              style={[styles.inputt, styles.readOnlyInput, { flex: 1, borderColor: '#FFFFFF' }]}
-              placeholderTextColor="#a0a0a0"
+              onChangeText={(text) => {
+                setInputType('amount');
+                setAmount(text);
+              }}
+              editable={true}
+              style={[styles.inputt, { flex: 1, borderColor: '#FFFFFF' }]}
               keyboardType='numeric'
+              placeholderTextColor="#a0a0a0"
             />
             <TouchableOpacity>
               <Icon name='' size={24} color="#a0a0a0" />
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.button]} onPress={handleDispenseFuel}>
-              <Text style={styles.signInText}>Dispense</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button1]}
-              onPress={() => navigation.navigate('Home')} // Adjust this to navigate to the appropriate screen
-            >
-              <Text style={styles.signUpText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
+
+          <TouchableOpacity style={styles.button} onPress={handleDispenseFuel}>
+            <Text style={styles.buttonText}>Dispense</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
-export default DispenseFuel;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F7F8FD',
   },
   scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '300',
-    marginBottom: 20,
+    padding: 16,
+    paddingBottom: 32,
   },
   title1: {
-    fontSize: 25,
-    marginBottom: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   clientCard: {
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    borderRadius: 20,
+    backgroundColor: '#d3d3d3',
+    borderRadius: 8,
+    padding: 16,
     marginBottom: 20,
-    backgroundColor: '#f0f0f0',
+    elevation: 2,
   },
   clientCardHeader: {
     flexDirection: 'row',
-    borderRadius: 20,
     alignItems: 'center',
-  },
-  button: {
-    width: 330,
-    height: 50,
-    backgroundColor: '#1890FF',
-    justifyContent: 'center',
-    borderRadius: 10,
-    marginRight: 20,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: '#a0a0a0',
-    borderColor: '#a0a0a0',
-  },
-  signInText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-  },
-  signUpText: {
-    fontSize: 17,
-    color: "#DC2626",
-  },
-  button1: {
-    width: 330,
-    height: 50,
-    borderColor: '#DC2626',
-    justifyContent: 'center',
-    marginTop: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: 'center',
-    backgroundColor: '#F0F2F5',
   },
   clientIcon: {
-    backgroundColor: '#4680FF',
-    borderRadius: 20,
-    paddingHorizontal: 30,
-    paddingVertical: 40,
-    marginRight: 15,
+    marginRight: 16,
   },
   clientName: {
-    fontSize: 25,
-    fontWeight: '300',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   clientPhone: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 14,
+    color: '#888',
   },
   clientAmount: {
-    fontSize: 25,
-    fontWeight: "bold",
-    marginTop: 5,
-  },
-  actionsContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  actionButtonBlue: {
-    flex: 1,
-    backgroundColor: '#007B5D',
-    paddingHorizontal: 10,
-    paddingVertical: 25,
-    borderRadius: 20,
-    marginBottom: 10,
-    marginRight: 5,
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    marginTop: 30,
-    marginVertical: 20,
-  },
-  actionButtonYellow: {
-    flex: 1,
-    backgroundColor: '#FFC107',
-    paddingHorizontal: 10,
-    paddingVertical: 25,
-    borderRadius: 20,
-    marginBottom: 10,
-    marginRight: 5,
-    alignItems: 'center',
-  },
-  actionButtonOrange: {
-    flex: 1,
-    backgroundColor: '#FF9800',
-    paddingHorizontal: 10,
-    paddingVertical: 25,
-    borderRadius: 20,
-    marginBottom: 10,
-    marginRight: 5,
-    alignItems: 'center',
-  },
-  actionButtonRed: {
-    flex: 1,
-    backgroundColor: '#FF0000',
-    paddingHorizontal: 10,
-    paddingVertical: 25,
-    borderRadius: 20,
-    marginBottom: 10,
-    marginRight: 5,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  input: {
-    height: 50,
-    borderColor: '#d0d0d0',
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    marginBottom: 20,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    height: 50,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    borderRadius: 5,
-    paddingHorizontal: 10,
     marginBottom: 20,
-    height: 50,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#E5E5E5',
+    paddingHorizontal: 8,
+  },
+  dropdown: {
+    flex: 1,
+    paddingVertical: 10,
+  },
+  dropdownText: {
+    fontSize: 16,
+  },
+  dropdownMenu: {
+    width: '90%',
+    marginTop: 10,
+    borderRadius: 8,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#E5E5E5',
+    paddingHorizontal: 8,
   },
   inputt: {
     flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     fontSize: 16,
   },
   readOnlyInput: {
     backgroundColor: '#f0f0f0',
+    color: '#a0a0a0',
   },
-  label: {
+  button: {
+    backgroundColor: '#5d79ff',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '300',
-    marginBottom: 5,
-  },
-  dropdown: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    height: 50,
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: 'black',
-  },
-  dropdownMenu: {
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    borderRadius: 5,
-    marginTop: 8,
+    fontWeight: 'bold',
   },
 });
+
+export default DispenseFuel;

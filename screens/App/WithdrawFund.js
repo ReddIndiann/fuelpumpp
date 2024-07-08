@@ -53,9 +53,9 @@ const WithdrawFunds = ({ route, navigation }) => {
           setBalance('0'); // Show 0 if customer has no account
         }
       } catch (error) {
-        console.error('Failed to fetch balance:', error);
+      
         setBalance('0'); // Show 0 in case of an error
-        Alert.alert('Error', 'Failed to fetch balance');
+        
       }
     };
 

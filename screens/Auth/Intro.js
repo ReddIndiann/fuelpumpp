@@ -58,11 +58,9 @@ const Intro = () => {
       </Swiper>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, isTablet && styles.tabletButton]} onPress={() => navigation.navigate('BottomTabs')} >
-          <Text style={styles.signInText}>Let’s begin</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button1, isTablet && styles.tabletButton1]} onPress={()=>navigateToScreen('Login')}>
-          <Text style={styles.signUpText}>Log in</Text>
+       
+        <TouchableOpacity style={[styles.button, isTablet && styles.tabletButton]} onPress={()=>navigateToScreen('Login')}>
+          <Text style={styles.signInText}>Log in</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -75,7 +73,7 @@ const styles = StyleSheet.create({
   swiper: {
     height: '90%',
     backgroundColor: '#fff',
-    marginTop: '10%',
+    marginTop: '30%',
   },
   slide: {
     alignItems: 'center',

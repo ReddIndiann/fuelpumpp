@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import ModalDropdown from 'react-native-modal-dropdown';
+import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -27,7 +28,7 @@ const ProductSupply = () => {
   const [driverNumber, setDriverNumber] = useState('');
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
-  const [selectedProductType, setSelectedProductType] = useState(null);
+  const [selectedProductType, setSelectedProductType] = useState(new IndexPath(0));
   const [agentId, setAgentId] = useState(null);
   const [products, setProducts] = useState([]);
   const { width } = useWindowDimensions();
@@ -62,10 +63,6 @@ const ProductSupply = () => {
     setDeliveryDate(currentDate);
   };
 
-  const handleProductTypeSelect = (index, value) => {
-    setSelectedProductType(value);
-  };
-
   const fetchProducts = async (agentId) => {
     try {
       const response = await fetch('https://gcnm.wigal.com.gh/clientproducts', {
@@ -96,7 +93,7 @@ const ProductSupply = () => {
         'https://gcnm.wigal.com.gh/productsupply',
         {
           agent_id: agentId,
-          product_id: selectedProductType === 'Product 1' ? '1' : '2',
+          product_id: products[selectedProductType.row].id,
           arrival_date: vehicleArrivalDate.toLocaleDateString(),
           delivered_quantity: quantityDelivered,
           vehicle_number: vehicleNumber,
@@ -118,132 +115,131 @@ const ProductSupply = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Product Supply</Text>
-          <Text style={styles.pageinfo}>
-            Lorem ipsum dolor sit amet,
-          </Text>
-          
-          <Text style={styles.label}>Select Product Type</Text>
-          <View style={styles.inputContainer}>
-            <ModalDropdown
-              options={products.map(product => product.product_name)}
-              onSelect={(index, value) => handleProductTypeSelect(index, value)}
-              textStyle={styles.dropdownText}
-              dropdownTextStyle={styles.dropdownOptionText}
-              dropdownStyle={styles.dropdownContainer}
-            >
-              <View style={styles.dropdownWrapper}>
-                <Text style={styles.dropdownText}>
-                  {selectedProductType || 'Select your product type'}
+    <ApplicationProvider {...eva} theme={eva.light}>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+            <Text style={styles.title}>Product Supply</Text>
+            <Text style={styles.pageinfo}>
+              Lorem ipsum dolor sit amet,
+            </Text>
+
+            <Text style={styles.label}>Select Product Type</Text>
+      
+              <Select
+                selectedIndex={selectedProductType}
+                onSelect={index => setSelectedProductType(index)}
+                value={products[selectedProductType.row]?.product_name || 'Select your product type'}
+                style={styles.select}
+                
+              >
+                {products.map((product, index) => (
+                  <SelectItem key={index} title={product.product_name} />
+                ))}
+              </Select>
+            
+
+            <Text style={styles.label}>Select Date of Vehicle Arrival</Text>
+            <View style={styles.inputContainer}>
+              <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
+                <Text style={styles.datePickerText}>
+                  {vehicleArrivalDate.toLocaleDateString()}
                 </Text>
-                <Icon name="keyboard-arrow-down" size={24} color="#a0a0a0" />
-              </View>
-            </ModalDropdown>
-          </View>
+                <Icon name="calendar-today" size={24} color="#a0a0a0" />
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.label}>Select Date of Vehicle Arrival</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {vehicleArrivalDate.toLocaleDateString()}
-              </Text>
-              <Icon name="calendar-today" size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
-          
-          {showVehicleArrivalDatePicker && (
-            <DateTimePicker
-              value={vehicleArrivalDate}
-              mode="date"
-              display="default"
-              onChange={handleVehicleArrivalDateChange}
-              minimumDate={new Date()}
-            />
-          )}
+            {showVehicleArrivalDatePicker && (
+              <DateTimePicker
+                value={vehicleArrivalDate}
+                mode="date"
+                display="default"
+                onChange={handleVehicleArrivalDateChange}
+                minimumDate={new Date()}
+              />
+            )}
 
-          <Text style={styles.label}>Select Delivery Date</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={() => setShowDeliveryDatePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {deliveryDate.toLocaleDateString()}
-              </Text>
-              <Icon name="calendar-today" size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
+            <Text style={styles.label}>Select Delivery Date</Text>
+            <View style={styles.inputContainer}>
+              <TouchableOpacity onPress={() => setShowDeliveryDatePicker(true)} style={styles.datePickerButton}>
+                <Text style={styles.datePickerText}>
+                  {deliveryDate.toLocaleDateString()}
+                </Text>
+                <Icon name="calendar-today" size={24} color="#a0a0a0" />
+              </TouchableOpacity>
+            </View>
 
-          {showDeliveryDatePicker && (
-            <DateTimePicker
-              value={deliveryDate}
-              mode="date"
-              display="default"
-              onChange={handleDeliveryDateChange}
-              minimumDate={new Date()}
-            />
-          )}
+            {showDeliveryDatePicker && (
+              <DateTimePicker
+                value={deliveryDate}
+                mode="date"
+                display="default"
+                onChange={handleDeliveryDateChange}
+                minimumDate={new Date()}
+              />
+            )}
 
-          <Text style={styles.label}>Enter Quantity Delivered</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter quantity"
-              value={quantityDelivered}
-              onChangeText={(text) => setQuantityDelivered(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-              keyboardType="numeric"
-            />
-          </View>
+            <Text style={styles.label}>Enter Quantity Delivered</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter quantity"
+                value={quantityDelivered}
+                onChangeText={(text) => setQuantityDelivered(text)}
+                style={styles.input}
+                placeholderTextColor="#a0a0a0"
+                keyboardType="numeric"
+              />
+            </View>
 
-          <Text style={styles.label}>Enter Vehicle Number</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter number"
-              value={vehicleNumber}
-              onChangeText={(text) => setVehicleNumber(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-            />
-          </View>
+            <Text style={styles.label}>Enter Vehicle Number</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter number"
+                value={vehicleNumber}
+                onChangeText={(text) => setVehicleNumber(text)}
+                style={styles.input}
+                placeholderTextColor="#a0a0a0"
+              />
+            </View>
 
-          <Text style={styles.label}>Enter Driver Name</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter name"
-              value={driverName}
-              onChangeText={(text) => setDriverName(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-            />
-          </View>
+            <Text style={styles.label}>Enter Driver Name</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter name"
+                value={driverName}
+                onChangeText={(text) => setDriverName(text)}
+                style={styles.input}
+                placeholderTextColor="#a0a0a0"
+              />
+            </View>
 
-          <Text style={styles.label}>Enter Driver Number</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter number"
-              value={driverNumber}
-              onChangeText={(text) => setDriverNumber(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-              keyboardType="numeric"
-            />
-          </View>
-        
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, isTablet && styles.tabletButton]}
-              onPress={handleSave}
-            >
-              <Text style={styles.signInText}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <Text style={styles.label}>Enter Driver Number</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter number"
+                value={driverNumber}
+                onChangeText={(text) => setDriverNumber(text)}
+                style={styles.input}
+                placeholderTextColor="#a0a0a0"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, isTablet && styles.tabletButton]}
+                onPress={handleSave}
+              >
+                <Text style={styles.signInText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ApplicationProvider>
   );
 };
 
@@ -301,6 +297,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#a0a0a0',
+    backgroundColor: '#fff',
   },
   buttonContainer: {
     flexDirection: 'column',
@@ -334,6 +331,15 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
     paddingVertical: 12,
+  },
+  select: {
+    width: '95%',
+    borderWidth: 0,
+    paddingLeft: 15,
+    marginRight:"5%",
+    backgroundColor: 'white',
+    height:'6%',
+    color:'white'
   },
   dropdownText: {
     fontSize: 18,

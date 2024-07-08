@@ -1,26 +1,58 @@
-import React, { useContext } from 'react';
-import { TouchableOpacity, View, StyleSheet, Animated, Text, Alert } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../screens/App/Home';
 import Record from '../screens/App/Records';
 import Supply from '../screens/App/Supply';
-import AddClients from '../screens/App/Clients';
-import Transactions from '../screens/App/Transactions';
+import Customers from '../screens/App/Customer';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import ProductSupply from '../screens/App/Productsupply';
 import StockRecords from '../screens/App/StockRecords';
-import Clients from '../screens/App/AddClient';
-import ExistingClientTransaction from '../screens/App/ExistingClientTransaction';
-import AuthContext from '../hooks/useAuthContext';
-import axios from 'axios';
+import Clients from '../screens/App/AddCustomers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import axios from 'axios';
+import AuthContext from '../hooks/useAuthContext';
 const Tab = createBottomTabNavigator();
 
 const AppTabs = () => {
-  const { logout } = useContext(AuthContext); // Use the logout function from context
+  const { logout } = useContext(AuthContext); // Assuming AuthContext provides logout functionality
   const navigation = useNavigation();
+  const [userName, setUserName] = useState('');
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    // Fetch user information from AsyncStorage or context
+    const fetchUserData = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem('user');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          setUserName(user.Name); // Assuming user object has a 'name' property
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    // Update greeting based on current time
+    const getCurrentGreeting = () => {
+      const currentHour = new Date().getHours();
+      if (currentHour < 12) {
+        setGreeting('Good Morning');
+      } else if (currentHour < 18) {
+        setGreeting('Good Afternoon');
+      } else {
+        setGreeting('Good Evening');
+      }
+    };
+
+    getCurrentGreeting();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -73,10 +105,10 @@ const AppTabs = () => {
           } else if (route.name === 'Supply') {
             iconName = focused ? 'cube' : 'cube-outline';
             label = 'Supply';
-          } else if (route.name === 'Client') {
+          } else if (route.name === 'Customers') {
             iconName = focused ? 'people' : 'people-outline';
-            label = 'Clients';
-          } 
+            label = 'Customers';
+          }
 
           return (
             <View style={{ alignItems: 'center' }}>
@@ -113,10 +145,10 @@ const AppTabs = () => {
           headerTitle: () => (
             <View style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: 'center', justifyContent: "center" }}>
               <Text style={{ color: "#c0c0c0" }}>
-                Good Morning!
+                {greeting}!
               </Text>
               <Text style={{ fontSize: 18 }}>
-                C Muthu Krishnan
+                {userName}
               </Text>
             </View>
           ),
@@ -144,7 +176,7 @@ const AppTabs = () => {
 
       <Tab.Screen name="Record" component={StockRecords} />
      
-      <Tab.Screen name="Client" component={AddClients} />
+      <Tab.Screen name="Customers" component={Customers} options={{ headerShown: false }} />
       
     </Tab.Navigator>
   );

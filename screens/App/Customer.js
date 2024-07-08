@@ -17,7 +17,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AddClients = () => {
+const Customer = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ const AddClients = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchClients = async () => {
+    const fetchCustomers = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
@@ -55,7 +55,7 @@ const AddClients = () => {
       }
     };
 
-    fetchClients();
+    fetchCustomers();
   }, []);
 
   const handleSearch = (text) => {
@@ -92,14 +92,14 @@ const AddClients = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Clients</Text>
+      
           <Text style={styles.pageInfo}>
-            Lorem ipsum dolor sit amet,
+
           </Text>
           <View style={styles.headerContainer}>
-            <Text style={styles.label}>Existing Clients</Text>
-            <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('AddClient')}>
-              <Text style={styles.addClientButtonText}>Add New Client</Text>
+            <Text style={styles.label}>Existing Customers</Text>
+            <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('addcustomers')}>
+              <Text style={styles.addClientButtonText}>Add New Customers</Text>
             </TouchableOpacity>
           </View>
           <TextInput
@@ -128,7 +128,7 @@ const AddClients = () => {
   );
 };
 
-export default AddClients;
+export default Customer;
 
 const styles = StyleSheet.create({
   container: {
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   label: {
-    fontSize: 20,
+    fontSize: 17,
   },
   addClientButton: {
     backgroundColor: '#007B5D',

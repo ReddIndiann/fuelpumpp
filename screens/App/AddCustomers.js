@@ -20,7 +20,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
-const Clients = () => {
+const AddCustomers = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -81,7 +81,7 @@ const Clients = () => {
         'Success',
         'Customer added successfully',
         [
-          { text: 'OK', onPress: () => navigation.navigate('Client') }
+          { text: 'OK', onPress: () => navigation.navigate('Customers') }
         ]
       );
 
@@ -98,12 +98,9 @@ const Clients = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : keyboardOpen ? 'height' : null}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Add Clients</Text>
-          <Text style={styles.pageinfo}>
-            aliqua
-          </Text>
-          <Text style={styles.label}>Add New Client</Text>
-          <Text style={styles.label}>Enter Name</Text>
+          <Text style={styles.title}>Add New Customer</Text>
+          
+        <Text style={styles.label}>Enter Name</Text>
           <TextInput
             placeholder="Enter your name"
             value={name}
@@ -171,7 +168,7 @@ const Clients = () => {
               onPress={handleAddClient}
               disabled={!isButtonEnabled}
             >
-              <Text style={styles.signInText}>Add Client</Text>
+              <Text style={styles.signInText}>Add Customers</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -190,7 +187,7 @@ const Clients = () => {
             <TouchableOpacity style={styles.modalIconContainer} onPress={() => setIsModalVisible(false)}>
               <Icon name="close" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.modalMessage}>Failed to add client</Text>
+            <Text style={styles.modalMessage}>Failed to add Customer</Text>
           </View>
         </View>
       </Modal>
@@ -198,7 +195,7 @@ const Clients = () => {
   );
 };
 
-export default Clients;
+export default AddCustomers;
 
 const styles = StyleSheet.create({
   container: {
@@ -211,9 +208,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 30,
+    fontSize: 25,
     alignSelf: 'flex-start',
     marginLeft: 20,
+    marginBottom:"10%"
   },
   label: {
     color: '#000000',

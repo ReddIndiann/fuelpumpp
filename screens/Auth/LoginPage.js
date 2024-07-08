@@ -129,11 +129,7 @@ const LoginPage = ({ navigation }) => {
             >
               <Text style={styles.signInText}>Log in</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button1, isTablet && styles.tabletButton1]}
-            >
-              <Text style={styles.signUpText}>Sign up with Google</Text>
-            </TouchableOpacity>
+           
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

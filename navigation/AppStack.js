@@ -15,7 +15,7 @@ import StockRecords from "../screens/App/StockRecords";
 
 import ProductSupply from "../screens/App/Productsupply";
 
-import AddClients from "../screens/App/AddClient";
+import AddCustomers from "../screens/App/AddCustomers";
 import RedrawFund from "../screens/App/WithdrawFund";
 import ExistingClientTransaction from "../screens/App/ExistingClientTransaction";
 import AuthStack from './AuthStack';
@@ -31,7 +31,7 @@ const AppStack = () => {
       <Stack.Screen name="profile" component={Profile} options={{ headerShown: true }} />
       <Stack.Screen name="productsupply" component={ProductSupply} options={{ headerShown: false }}/>
       <Stack.Screen name="stockrecords" component={StockRecords} />
-      <Stack.Screen name="addclient" component={AddClients} options={{ headerShown: false }} />
+      <Stack.Screen name="addcustomers" component={AddCustomers} options={{ headerShown: true }} />
       <Stack.Screen name="existingclienttransaction" component={ExistingClientTransaction} options={{ headerShown: true }}/>
       <Stack.Screen name="dispensefuel" component={DispenseFuel} options={{ headerShown: true }} />
       <Stack.Screen name="addfunds" component={AddFunds} options={{ headerShown: true }} />

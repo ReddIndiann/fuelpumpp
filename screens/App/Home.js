@@ -67,7 +67,7 @@ const Home = () => {
 
       const data = await response.json();
       if (data.statuscode === '00') {
-        setTotalAmountSold(data.data);
+        setTotalAmountSold(data.data.total_amount_sold); // Use a specific property from the object
       } else {
         console.error('Failed to fetch total amount sold:', data.message);
       }

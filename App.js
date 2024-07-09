@@ -5,14 +5,15 @@ import AppStack from './navigation/AppStack';
 import { enableScreens } from 'react-native-screens';
 import { AuthProvider } from './hooks/useAuthContext';
 import AuthContext from './hooks/useAuthContext';
-
+import * as eva from '@eva-design/eva';
+import { ApplicationProvider, Layout, Text } from '@ui-kitten/components';
 enableScreens();
 
 const AppNavigator = () => {
   const { user } = React.useContext(AuthContext);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer> 
       {user ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   );
@@ -21,7 +22,12 @@ const AppNavigator = () => {
 const App = () => {
   return (
     <AuthProvider>
+        <ApplicationProvider {...eva} theme={eva.light}>
+
       <AppNavigator />
+
+          
+        </ApplicationProvider>
     </AuthProvider>
   );
 };

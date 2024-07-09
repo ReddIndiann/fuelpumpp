@@ -133,7 +133,7 @@ export default Customer;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f3f3',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -192,13 +192,13 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 10,
     borderRadius: 10,
-    shadowColor: '#000',
+  
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 0,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.15,
+    shadowRadius: 1.84,
     elevation: 5,
   },
   cardText: {

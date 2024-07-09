@@ -12,10 +12,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import ModalDropdown from 'react-native-modal-dropdown';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-kitten/components';
 
 const DispenseFuel = () => {
   const { width } = useWindowDimensions();
@@ -64,9 +64,7 @@ const DispenseFuel = () => {
           setBalance('0'); // Show 0 if customer has no account
         }
       } catch (error) {
-      
         setBalance('0'); // Show 0 in case of an error
-       
       }
     };
 
@@ -186,19 +184,21 @@ const DispenseFuel = () => {
          
           <Text style={styles.label}>Select Product Type</Text>
           
-          <View style={styles.inputContainer}>
-            <ModalDropdown
-              options={products.map(product => product.product_name)}
+          
+            <Select
+              selectedIndex={new IndexPath(0)}
+              onSelect={index => setProductType(products[index.row].product_name)}
+              value={productType || 'Select your product type'}
               style={styles.dropdown}
-              textStyle={styles.dropdownText}
-              dropdownStyle={styles.dropdownMenu}
-              onSelect={(index, value) => setProductType(value)}
-              defaultValue="Select your product type"
-            />
+            >
+              {products.map((product, index) => (
+                <SelectItem key={index} title={product.product_name} />
+              ))}
+            </Select>
             <TouchableOpacity>
               <Icon size={24} color="#a0a0a0" />
             </TouchableOpacity>
-          </View>
+     
           
           <Text style={styles.label}>Display Price Per Litre</Text>
           <View style={styles.passwordContainer}>
@@ -319,14 +319,6 @@ const styles = StyleSheet.create({
   dropdown: {
     flex: 1,
     paddingVertical: 10,
-  },
-  dropdownText: {
-    fontSize: 16,
-  },
-  dropdownMenu: {
-    width: '90%',
-    marginTop: 10,
-    borderRadius: 8,
   },
   passwordContainer: {
     flexDirection: 'row',

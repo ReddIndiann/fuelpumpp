@@ -9,15 +9,14 @@ import {
   useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
   ScrollView,
-  Modal,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
-import ModalDropdown from 'react-native-modal-dropdown';
+import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StockRecords = () => {
@@ -25,7 +24,7 @@ const StockRecords = () => {
   const [dippingTime, setDippingTime] = useState(new Date());
   const [showDippingTimePicker, setShowDippingTimePicker] = useState(false);
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
-  const [selectedProductType, setSelectedProductType] = useState(null);
+  const [selectedProductType, setSelectedProductType] = useState(new IndexPath(0));
   const [dippingQuantity, setDippingQuantity] = useState('');
   const [dispenserQuantity, setDispenserQuantity] = useState('');
   const [agentId, setAgentId] = useState(null);
@@ -77,18 +76,14 @@ const StockRecords = () => {
 
   const handleVehicleArrivalDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || vehicleArrivalDate;
-    setShowVehicleArrivalDatePicker(Platform.OS === 'ios');
+    setShowVehicleArrivalDatePicker(false);
     setVehicleArrivalDate(currentDate);
   };
 
   const handleDippingTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || dippingTime;
-    setShowDippingTimePicker(Platform.OS === 'ios');
+    setShowDippingTimePicker(false);
     setDippingTime(currentTime);
-  };
-
-  const handleProductTypeSelect = (index, value) => {
-    setSelectedProductType(value);
   };
 
   const handleSubmit = () => {
@@ -97,15 +92,24 @@ const StockRecords = () => {
       return;
     }
 
+    const selectedProduct = products[selectedProductType.row]; // Get the selected product
+
+    if (!selectedProduct) {
+      Alert.alert('Error', 'Product not selected.');
+      return;
+    }
+
     const payload = {
       agent_id: agentId,
       location_id: "3",
-      product_id: selectedProductType,
+      product_id: selectedProduct.product_id, // Use the selected product's ID
       record_date: vehicleArrivalDate.toISOString().split('T')[0],
       dipping_time: dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       dipping_quantity: dippingQuantity,
-      dispenser_qunatity: dispenserQuantity,
+      dispenser_quantity: dispenserQuantity, // Fix typo: 'qunatity' to 'quantity'
     };
+
+    console.log('Payload:', payload); // Log the payload
 
     axios.post('https://gcnm.wigal.com.gh/stockrecords', payload, {
       headers: {
@@ -117,7 +121,7 @@ const StockRecords = () => {
       Alert.alert('Success', 'Stock record saved successfully');
     })
     .catch(error => {
-      console.error(error);
+      console.error('Error:', error); // Log the error for debugging
       Alert.alert('Error', 'Failed to save stock record');
     });
   };
@@ -134,16 +138,23 @@ const StockRecords = () => {
             Lorem ipsum dolor sit amet
           </Text>
           <Text style={styles.label}>Select Product Type</Text>
-          <View style={styles.inputContainer}>
-            <ModalDropdown
-              options={products.map(product => product.product_name)}
-              onSelect={(index, value) => handleProductTypeSelect(index, value)}
-              textStyle={styles.dropdownText}
-              dropdownTextStyle={styles.dropdownOptionText}
-              dropdownStyle={styles.dropdownContainer}
-              defaultValue={'Select your product type'}
-            />
-          </View>
+          <Select
+            size='large'
+            selectedIndex={selectedProductType}
+            onSelect={index => {
+              setSelectedProductType(index);
+              const selectedProduct = products[index.row];
+              console.log('Selected Product ID:', selectedProduct.product_id);
+              console.log('Selected Product Name:', selectedProduct.product_name);
+              console.log('Selected Product Price:', selectedProduct.price); // Log the selected product details
+            }}
+            value={products[selectedProductType.row]?.product_name || 'Select your product type'}
+            style={styles.select}
+          >
+            {products.map((product, index) => (
+              <SelectItem key={index} title={product.product_name} />
+            ))}
+          </Select>
 
           <Text style={styles.label}>Select Date of Record</Text>
           <View style={styles.inputContainer}>
@@ -310,6 +321,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingLeft: 15,
     paddingVertical: 10,
+  },
+  select: {
+    width: '95%',
+    borderWidth: 0,
+    paddingLeft: 15,
+    marginRight:"5%",
+    backgroundColor: 'transparent',
+    height:'10%',
+  
   },
   dropdownContainer: {
     width: '90%',

@@ -115,7 +115,7 @@ const ProductSupply = () => {
   };
 
   return (
-    <ApplicationProvider {...eva} theme={eva.light}>
+    
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.container}
@@ -130,6 +130,8 @@ const ProductSupply = () => {
             <Text style={styles.label}>Select Product Type</Text>
       
               <Select
+              size='large'
+                // status='transparent'
                 selectedIndex={selectedProductType}
                 onSelect={index => setSelectedProductType(index)}
                 value={products[selectedProductType.row]?.product_name || 'Select your product type'}
@@ -239,7 +241,7 @@ const ProductSupply = () => {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ApplicationProvider>
+   
   );
 };
 
@@ -301,7 +303,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignContent: 'center',
     marginVertical: 20,
   },
   button: {
@@ -313,7 +316,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 60,
     borderRadius: 10,
-    marginRight: 20,
+   
     alignItems: 'center',
   },
   buttonDisabled: {
@@ -337,9 +340,9 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     paddingLeft: 15,
     marginRight:"5%",
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     height:'6%',
-    color:'white'
+  
   },
   dropdownText: {
     fontSize: 18,

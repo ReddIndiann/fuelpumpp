@@ -276,7 +276,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignContent: 'center',
     marginVertical: 20,
     marginTop: 240,
   },

@@ -12,6 +12,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
@@ -25,11 +26,12 @@ const StockRecords = () => {
   const [showDippingTimePicker, setShowDippingTimePicker] = useState(false);
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState(new IndexPath(0));
+  const [selectedProductId, setSelectedProductId] = useState(null);
   const [dippingQuantity, setDippingQuantity] = useState('');
   const [dispenserQuantity, setDispenserQuantity] = useState('');
   const [agentId, setAgentId] = useState(null);
   const [products, setProducts] = useState([]);
-
+  const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -65,7 +67,10 @@ const StockRecords = () => {
       const data = await response.json();
       if (data.statuscode === '00') {
         setProducts(data.data);
-        console.log('Fetched products:', data.data); // Log the fetched products
+        // Log the fetched products' details
+        data.data.forEach(product => {
+          console.log(`Product ID: ${product.id}, Name: ${product.product_name}, Price: ${product.price}`);
+        });
       } else {
         console.error('Failed to fetch products:', data.message);
       }
@@ -92,24 +97,15 @@ const StockRecords = () => {
       return;
     }
 
-    const selectedProduct = products[selectedProductType.row]; // Get the selected product
-
-    if (!selectedProduct) {
-      Alert.alert('Error', 'Product not selected.');
-      return;
-    }
-
     const payload = {
       agent_id: agentId,
       location_id: "3",
-      product_id: selectedProduct.product_id, // Use the selected product's ID
+      product_id: selectedProductId,
       record_date: vehicleArrivalDate.toISOString().split('T')[0],
       dipping_time: dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       dipping_quantity: dippingQuantity,
-      dispenser_quantity: dispenserQuantity, // Fix typo: 'qunatity' to 'quantity'
+      dispenser_qunatity: dispenserQuantity,
     };
-
-    console.log('Payload:', payload); // Log the payload
 
     axios.post('https://gcnm.wigal.com.gh/stockrecords', payload, {
       headers: {
@@ -118,10 +114,12 @@ const StockRecords = () => {
     })
     .then(response => {
       console.log(response.data);
-      Alert.alert('Success', 'Stock record saved successfully');
+      Alert.alert('Success', 'Stock record saved successfully', [
+        { text: 'OK', onPress: () => navigation.navigate('RecordProductList') }
+      ]);
     })
     .catch(error => {
-      console.error('Error:', error); // Log the error for debugging
+      console.error(error);
       Alert.alert('Error', 'Failed to save stock record');
     });
   };
@@ -144,9 +142,8 @@ const StockRecords = () => {
             onSelect={index => {
               setSelectedProductType(index);
               const selectedProduct = products[index.row];
-              console.log('Selected Product ID:', selectedProduct.product_id);
-              console.log('Selected Product Name:', selectedProduct.product_name);
-              console.log('Selected Product Price:', selectedProduct.price); // Log the selected product details
+              setSelectedProductId(selectedProduct.id); // Set the selected product ID
+              console.log(`Selected Product - ID: ${selectedProduct.id}, Name: ${selectedProduct.product_name}, Price: ${selectedProduct.price}`);
             }}
             value={products[selectedProductType.row]?.product_name || 'Select your product type'}
             style={styles.select}

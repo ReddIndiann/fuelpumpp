@@ -5,14 +5,14 @@ import BottomTabs from './Bottomtabs'; // Assuming BottomTabs.js is in the same 
 import AddReminder from '../screens/App/AddReminder';
 import UserProfile from '../screens/Auth/UserProfile';
 
-
+import RecordProductList from '../screens/App/RecordProductList';
 
 import Transactions from '../screens/App/Transactions';
 import DispenseFuel from "../screens/App/DispenseFuel";
 import AddFunds from "../screens/App/AddFunds";
 import Profile from "../screens/App/Profile";
 import StockRecords from "../screens/App/StockRecords";
-
+import stockProductList from '../screens/App/StockProductList';
 import ProductSupply from "../screens/App/Productsupply";
 
 import AddCustomers from "../screens/App/AddCustomers";
@@ -36,6 +36,8 @@ const AppStack = () => {
       <Stack.Screen name="dispensefuel" component={DispenseFuel} options={{ headerShown: true }} />
       <Stack.Screen name="addfunds" component={AddFunds} options={{ headerShown: true }} />
       <Stack.Screen name="redrawfund" component={RedrawFund} options={{ headerShown: true }}/>
+      <Stack.Screen name="RecordProductList" component={RecordProductList} options={{ headerShown: true }}/>
+      <Stack.Screen name="stockProductList" component={stockProductList} options={{ headerShown: true }}/>
 
     </Stack.Navigator>
   );

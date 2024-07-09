@@ -140,70 +140,9 @@ const Home = () => {
             </View>
           ))}
         </View>
-        <View style={styles.tabs}>
-          <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-            <Text style={styles.tabText}>Fuel Sold</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tab}>
-            <Text style={styles.tabText}>Stock Records</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.barChartContainer}>
-          {data.map((item, index) => (
-            <View key={index} style={styles.barContainer}>
-              <View style={styles.bars}>
-                <View style={[styles.bar, { height: item.product1 * 2, backgroundColor: 'green' }]} />
-                <View style={[styles.bar, { height: item.product2 * 2, backgroundColor: 'blue' }]} />
-              </View>
-              <Text style={styles.label}>{item.month}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={styles.legendContainer}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: 'blue' }]} />
-            <Text style={styles.legendText}>Product 1</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: 'green' }]} />
-            <Text style={styles.legendText}>Product 2</Text>
-          </View>
-        </View>
-
-        <Text style={styles.description}>
-          Minim dolor in amet nulla laboris enim dolore consequat.
-        </Text>
-
-        <View style={styles.transferContainer}>
-          <Text style={styles.transferTitle}>Latest Transfers</Text>
-          <Text style={styles.transferAmount}>GHS 450,00.00</Text>
-          <Text style={styles.transferChange}>+17%</Text>
-
-
-          <View style={styles.customBarChartContainer}>
-            <View style={styles.yAxis}>
-              {[5, 4, 3, 2, 1, 0].map((_, index) => (
-                <Text key={index} style={styles.yAxisLabel}>{Math.round(step * index)}</Text>
-              ))}
-            </View>
-            <View style={styles.chart}>
-              {dataa.map((item, index) => (
-                <View key={index} style={styles.barContainer}>
-                  <View
-                    style={[
-                      styles.customBar,
-                      {
-                        height: `${(item.value / maxValue) * 100}%`,
-                      },
-                    ]}
-                  />
-                  <Text style={styles.barLabel}>{item.label}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
+      
+        
+       
       </ScrollView>
     </SafeAreaView>
   );

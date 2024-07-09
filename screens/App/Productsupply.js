@@ -18,6 +18,7 @@ import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-
 import * as eva from '@eva-design/eva';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const ProductSupply = () => {
   const [vehicleArrivalDate, setVehicleArrivalDate] = useState(new Date());
@@ -29,10 +30,12 @@ const ProductSupply = () => {
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState(new IndexPath(0));
+  const [selectedProductId, setSelectedProductId] = useState(null);
   const [agentId, setAgentId] = useState(null);
   const [products, setProducts] = useState([]);
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchAgentId = async () => {
@@ -90,15 +93,15 @@ const ProductSupply = () => {
   const handleSave = async () => {
     try {
       const response = await axios.post(
-        'https://gcnm.wigal.com.gh/productsupply',
+        'https://gcnm.wigal.com.gh/fetchProductsupplylist',
         {
           agent_id: agentId,
-          product_id: products[selectedProductType.row].id,
+          product_id: selectedProductId,
           arrival_date: vehicleArrivalDate.toLocaleDateString(),
           delivered_quantity: quantityDelivered,
           vehicle_number: vehicleNumber,
           driver_name: driverName,
-          driver_number: driverNumber
+          driver_number: driverNumber,
         },
         {
           headers: {
@@ -107,7 +110,9 @@ const ProductSupply = () => {
         }
       );
       console.log('Product supply saved successfully:', response.data);
-      Alert.alert('Success', 'Product supply saved successfully');
+      Alert.alert('Success', 'Product supply saved successfully', [
+        { text: 'OK', onPress: () => navigation.navigate('stockProductList') }
+      ]);
     } catch (error) {
       console.error('Error saving product supply:', error);
       Alert.alert('Error', 'Failed to save product supply');
@@ -115,136 +120,134 @@ const ProductSupply = () => {
   };
 
   return (
-    
-      <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-            <Text style={styles.title}>Product Supply</Text>
-            <Text style={styles.pageinfo}>
-              Lorem ipsum dolor sit amet,
-            </Text>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <Text style={styles.title}>Product Supply</Text>
+          <Text style={styles.pageinfo}>
+            Lorem ipsum dolor sit amet,
+          </Text>
 
-            <Text style={styles.label}>Select Product Type</Text>
-      
-              <Select
-              size='large'
-                // status='transparent'
-                selectedIndex={selectedProductType}
-                onSelect={index => setSelectedProductType(index)}
-                value={products[selectedProductType.row]?.product_name || 'Select your product type'}
-                style={styles.select}
-                
-              >
-                {products.map((product, index) => (
-                  <SelectItem key={index} title={product.product_name} />
-                ))}
-              </Select>
-            
+          <Text style={styles.label}>Select Product Type</Text>
+          <Select
+            size='large'
+            selectedIndex={selectedProductType}
+            onSelect={index => {
+              setSelectedProductType(index);
+              const selectedProduct = products[index.row];
+              setSelectedProductId(selectedProduct.id); // Set the selected product ID
+              console.log(`Selected Product - ID: ${selectedProduct.id}, Name: ${selectedProduct.product_name}`);
+            }}
+            value={products[selectedProductType.row]?.product_name || 'Select your product type'}
+            style={styles.select}
+          >
+            {products.map((product, index) => (
+              <SelectItem key={index} title={product.product_name} />
+            ))}
+          </Select>
 
-            <Text style={styles.label}>Select Date of Vehicle Arrival</Text>
-            <View style={styles.inputContainer}>
-              <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
-                <Text style={styles.datePickerText}>
-                  {vehicleArrivalDate.toLocaleDateString()}
-                </Text>
-                <Icon name="calendar-today" size={24} color="#a0a0a0" />
-              </TouchableOpacity>
-            </View>
+          <Text style={styles.label}>Select Date of Vehicle Arrival</Text>
+          <View style={styles.inputContainer}>
+            <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
+              <Text style={styles.datePickerText}>
+                {vehicleArrivalDate.toLocaleDateString()}
+              </Text>
+              <Icon name="calendar-today" size={24} color="#a0a0a0" />
+            </TouchableOpacity>
+          </View>
 
-            {showVehicleArrivalDatePicker && (
-              <DateTimePicker
-                value={vehicleArrivalDate}
-                mode="date"
-                display="default"
-                onChange={handleVehicleArrivalDateChange}
-                minimumDate={new Date()}
-              />
-            )}
+          {showVehicleArrivalDatePicker && (
+            <DateTimePicker
+              value={vehicleArrivalDate}
+              mode="date"
+              display="default"
+              onChange={handleVehicleArrivalDateChange}
+              minimumDate={new Date()}
+            />
+          )}
 
-            <Text style={styles.label}>Select Delivery Date</Text>
-            <View style={styles.inputContainer}>
-              <TouchableOpacity onPress={() => setShowDeliveryDatePicker(true)} style={styles.datePickerButton}>
-                <Text style={styles.datePickerText}>
-                  {deliveryDate.toLocaleDateString()}
-                </Text>
-                <Icon name="calendar-today" size={24} color="#a0a0a0" />
-              </TouchableOpacity>
-            </View>
+          <Text style={styles.label}>Select Delivery Date</Text>
+          <View style={styles.inputContainer}>
+            <TouchableOpacity onPress={() => setShowDeliveryDatePicker(true)} style={styles.datePickerButton}>
+              <Text style={styles.datePickerText}>
+                {deliveryDate.toLocaleDateString()}
+              </Text>
+              <Icon name="calendar-today" size={24} color="#a0a0a0" />
+            </TouchableOpacity>
+          </View>
 
-            {showDeliveryDatePicker && (
-              <DateTimePicker
-                value={deliveryDate}
-                mode="date"
-                display="default"
-                onChange={handleDeliveryDateChange}
-                minimumDate={new Date()}
-              />
-            )}
+          {showDeliveryDatePicker && (
+            <DateTimePicker
+              value={deliveryDate}
+              mode="date"
+              display="default"
+              onChange={handleDeliveryDateChange}
+              minimumDate={new Date()}
+            />
+          )}
 
-            <Text style={styles.label}>Enter Quantity Delivered</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder="Enter quantity"
-                value={quantityDelivered}
-                onChangeText={(text) => setQuantityDelivered(text)}
-                style={styles.input}
-                placeholderTextColor="#a0a0a0"
-                keyboardType="numeric"
-              />
-            </View>
+          <Text style={styles.label}>Enter Quantity Delivered</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter quantity"
+              value={quantityDelivered}
+              onChangeText={(text) => setQuantityDelivered(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+              keyboardType="numeric"
+            />
+          </View>
 
-            <Text style={styles.label}>Enter Vehicle Number</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder="Enter number"
-                value={vehicleNumber}
-                onChangeText={(text) => setVehicleNumber(text)}
-                style={styles.input}
-                placeholderTextColor="#a0a0a0"
-              />
-            </View>
+          <Text style={styles.label}>Enter Vehicle Number</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter number"
+              value={vehicleNumber}
+              onChangeText={(text) => setVehicleNumber(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
 
-            <Text style={styles.label}>Enter Driver Name</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder="Enter name"
-                value={driverName}
-                onChangeText={(text) => setDriverName(text)}
-                style={styles.input}
-                placeholderTextColor="#a0a0a0"
-              />
-            </View>
+          <Text style={styles.label}>Enter Driver Name</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter name"
+              value={driverName}
+              onChangeText={(text) => setDriverName(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
 
-            <Text style={styles.label}>Enter Driver Number</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder="Enter number"
-                value={driverNumber}
-                onChangeText={(text) => setDriverNumber(text)}
-                style={styles.input}
-                placeholderTextColor="#a0a0a0"
-                keyboardType="numeric"
-              />
-            </View>
+          <Text style={styles.label}>Enter Driver Number</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder="Enter number"
+              value={driverNumber}
+              onChangeText={(text) => setDriverNumber(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+              keyboardType="numeric"
+            />
+          </View>
 
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, isTablet && styles.tabletButton]}
-                onPress={handleSave}
-              >
-                <Text style={styles.signInText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-   
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, isTablet && styles.tabletButton]}
+              onPress={handleSave}
+            >
+              <Text style={styles.signInText}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
-
 export default ProductSupply;
 
 const styles = StyleSheet.create({

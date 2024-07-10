@@ -54,16 +54,25 @@ const ProductSupply = () => {
     fetchAgentId();
   }, []);
 
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleVehicleArrivalDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || vehicleArrivalDate;
     setShowVehicleArrivalDatePicker(Platform.OS === 'ios');
     setVehicleArrivalDate(currentDate);
+    console.log('Selected Vehicle Arrival Date:', formatDate(currentDate));
   };
 
   const handleDeliveryDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || deliveryDate;
     setShowDeliveryDatePicker(Platform.OS === 'ios');
     setDeliveryDate(currentDate);
+    console.log('Selected Delivery Date:', formatDate(currentDate));
   };
 
   const fetchProducts = async (agentId) => {
@@ -91,13 +100,19 @@ const ProductSupply = () => {
   };
 
   const handleSave = async () => {
+    // Validate all fields are filled
+    if (!agentId || !selectedProductId || !quantityDelivered || !vehicleNumber || !driverName || !driverNumber) {
+      Alert.alert('Error', 'Please fill all form inputs before saving.');
+      return;
+    }
+  
     try {
       const response = await axios.post(
-        'https://gcnm.wigal.com.gh/fetchProductsupplylist',
+        'https://gcnm.wigal.com.gh/productsupply',
         {
           agent_id: agentId,
           product_id: selectedProductId,
-          arrival_date: vehicleArrivalDate.toLocaleDateString(),
+          arrival_date: formatDate(vehicleArrivalDate),
           delivered_quantity: quantityDelivered,
           vehicle_number: vehicleNumber,
           driver_name: driverName,
@@ -118,7 +133,8 @@ const ProductSupply = () => {
       Alert.alert('Error', 'Failed to save product supply');
     }
   };
-
+  
+console.log(selectedProductId)
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -127,10 +143,7 @@ const ProductSupply = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Product Supply</Text>
-          <Text style={styles.pageinfo}>
-            Lorem ipsum dolor sit amet,
-          </Text>
-
+          
           <Text style={styles.label}>Select Product Type</Text>
           <Select
             size='large'
@@ -250,6 +263,7 @@ const ProductSupply = () => {
 };
 export default ProductSupply;
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -264,6 +278,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     alignSelf: 'flex-start',
     marginLeft: 20,
+    marginBottom:"6%"
   },
   label: {
     color: '#000000',

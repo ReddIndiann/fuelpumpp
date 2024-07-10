@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -5,24 +6,23 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect } from 'react';
 
 const ExistingClientTransaction = () => {
-  const { width } = useWindowDimensions();
   const navigation = useNavigation();
   const route = useRoute();
   const { client } = route.params;
   const [agentId, setAgentId] = useState('');
-  const [balance, setBalance] = useState('0'); // Initial balance state
+  const [balance, setBalance] = useState('0');
+  const [fadeAnim] = useState(new Animated.Value(0));
 
   const handleCloseAccount = () => {
     Alert.alert(
@@ -43,11 +43,17 @@ const ExistingClientTransaction = () => {
   };
 
   useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+
     const fetchAgentId = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
-        setAgentId(user?.id); // Adjust this based on your user object structure
+        setAgentId(user?.id);
       } catch (error) {
         console.error('Failed to fetch agent ID:', error);
       }
@@ -56,8 +62,8 @@ const ExistingClientTransaction = () => {
     const fetchBalance = async () => {
       try {
         const response = await axios.post(
-          'https://gcnm.wigal.com.gh/getcustomerbalance',
-          { customer_id: client.customerId },
+          'https://gcnm.wigal.com.gh/verifycustomer',
+          { customerphonenumber: client.phonenumber },
           {
             headers: {
               'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
@@ -65,14 +71,12 @@ const ExistingClientTransaction = () => {
           }
         );
         if (response.status === 200 && response.data.statuscode === '00') {
-          setBalance(response.data.data.total_amount); // Update balance state
+          setBalance(response.data.data.balance);
         } else {
-          setBalance('0'); // Show 0 if customer has no account
+          setBalance('0');
         }
       } catch (error) {
-        
-        setBalance('0'); // Show 0 in case of an error
-       
+        setBalance('0');
       }
     };
 
@@ -105,6 +109,13 @@ const ExistingClientTransaction = () => {
     }
   };
 
+  const ActionButton = ({ icon, text, color, onPress }) => (
+    <TouchableOpacity style={[styles.actionButton, { backgroundColor: color }]} onPress={onPress}>
+      <Icon name={icon} size={28} color="#fff" />
+      <Text style={styles.actionButtonText}>{text}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -112,53 +123,46 @@ const ExistingClientTransaction = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Existing Client Transactions</Text>
+          <Text style={styles.title}>Client Transactions</Text>
 
-          {/* Client Information Card */}
-          <View style={styles.clientCard}>
+          <Animated.View style={[styles.clientCard, { opacity: fadeAnim }]}>
             <View style={styles.clientCardHeader}>
-              <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
-              <View>
+              <View style={styles.clientIconContainer}>
+                <Icon name="person" size={40} color="#fff" />
+              </View>
+              <View style={styles.clientInfo}>
                 <Text style={styles.clientName}>{client.name}</Text>
                 <Text style={styles.clientPhone}>{client.phonenumber}</Text>
-                <Text style={styles.clientAmount}> gh₵ {balance}</Text> 
+                <Text style={styles.clientAmount}>GH₵ {balance}</Text>
               </View>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Action Buttons */}
           <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.actionButtonBlue}
+            <ActionButton
+              icon="local-gas-station"
+              text="Dispense Fuel"
+              color="#3498db"
               onPress={() => navigation.navigate('dispensefuel', { client })}
-            >
-              <Icon name="local-gas-station" size={24} color="#fff" />
-              <Text style={styles.actionButtonText}>Dispense Fuel</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButtonYellow}
+            />
+            <ActionButton
+              icon="attach-money"
+              text="Add Funds"
+              color="#2ecc71"
               onPress={() => navigation.navigate('addfunds', { client })}
-            >
-              <Icon name="attach-money" size={24} color="#fff" />
-              <Text style={styles.actionButtonText}>Add Funds</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButtonGreen}
-              onPress={() => navigation.navigate('redrawfund', { client })}
-            >
-              <Icon name="remove-circle" size={24} color="#fff" />
-              <Text style={styles.actionButtonText}>Withdraw Funds</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButtonRed}
+            />
+            <ActionButton
+              icon="remove-circle"
+              text="Withdraw Funds"
+              color="#e74c3c"
+              onPress={() => navigation.navigate('withdrawfund', { client })}
+            />
+            <ActionButton
+              icon="close"
+              text="Close Account"
+              color="#95a5a6"
               onPress={handleCloseAccount}
-            >
-              <Icon name="close" size={24} color="#fff" />
-              <Text style={styles.actionButtonText}>Close Account</Text>
-            </TouchableOpacity>
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -166,101 +170,80 @@ const ExistingClientTransaction = () => {
   );
 };
 
-export default ExistingClientTransaction;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f6fa',
   },
   scrollContainer: {
     flexGrow: 1,
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#2c3e50',
   },
   clientCard: {
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    borderRadius: 20,
+    borderRadius: 15,
     marginBottom: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   clientCardHeader: {
     flexDirection: 'row',
-    borderRadius: 20,
+    padding: 20,
     alignItems: 'center',
   },
-  clientIcon: {
-    backgroundColor: '#4680FF',
-    borderRadius: 20,
-    paddingHorizontal: 30,
-    paddingVertical: 40,
+  clientIconContainer: {
+    backgroundColor: '#3498db',
+    borderRadius: 50,
+    padding: 15,
     marginRight: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  clientInfo: {
+    flex: 1,
   },
   clientName: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#2c3e50',
   },
   clientPhone: {
     fontSize: 16,
-    color: '#777',
-  },
-  clientAmount: {
-    fontSize: 18,
-    color: '#007B5D',
+    color: '#7f8c8d',
     marginTop: 5,
   },
+  clientAmount: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#27ae60',
+    marginTop: 10,
+  },
   actionsContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
   },
-  actionButtonBlue: {
-    flexDirection: 'column',
-    backgroundColor: '#4680FF',
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    borderRadius: 20,
-    marginBottom: 10,
+  actionButton: {
+    width: '48%',
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginBottom: 15,
     alignItems: 'center',
-  },
-  actionButtonYellow: {
-    flexDirection: 'column',
-    backgroundColor: '#FFC107',
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    borderRadius: 20,
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  actionButtonGreen: {
-    flexDirection: 'column',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    borderRadius: 20,
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  actionButtonRed: {
-    flexDirection: 'column',
-    backgroundColor: '#F44336',
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    borderRadius: 20,
-    marginBottom: 10,
-    alignItems: 'center',
+    justifyContent: 'center',
   },
   actionButtonText: {
     color: '#fff',
     fontSize: 14,
     marginTop: 5,
-    textAlign: 'center',
+    fontWeight: '600',
   },
 });
+
+export default ExistingClientTransaction;

@@ -39,8 +39,8 @@ const WithdrawFunds = ({ route, navigation }) => {
     const fetchBalance = async () => {
       try {
         const response = await axios.post(
-          'https://gcnm.wigal.com.gh/getcustomerbalance',
-          { customer_id: client.customerId },
+          'https://gcnm.wigal.com.gh/verifycustomer',
+          { customerphonenumber: client.phonenumber },
           {
             headers: {
               'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
@@ -48,7 +48,7 @@ const WithdrawFunds = ({ route, navigation }) => {
           }
         );
         if (response.status === 200 && response.data.statuscode === '00') {
-          setBalance(response.data.data.total_amount); // Update balance state
+          setBalance(response.data.data.balance); // Update balance state
         } else {
           setBalance('0'); // Show 0 if customer has no account
         }
@@ -102,7 +102,7 @@ const WithdrawFunds = ({ route, navigation }) => {
               <View>
                 <Text style={styles.clientName}>{client.name}</Text>
                 <Text style={styles.clientPhone}>{client.phonenumber}</Text>
-                <Text style={styles.clientAmount}>gh₵ {balance}</Text>
+                <Text style={styles.clientAmount}>GH₵ {balance}</Text>
               </View>
             </View>
           </View>
@@ -157,11 +157,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   clientCard: {
-    borderWidth: 1,
-    borderColor: '#d0d0d0',
-    borderRadius: 20,
-    marginBottom: 20,
     backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 2,
+    height:'20%'
   },
   clientCardHeader: {
     flexDirection: 'row',
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
   button: {
     width: 330,
     height: 50,
-    backgroundColor: '#FAAD14',
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     borderRadius: 10,
     marginRight: 20,
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F2F5',
   },
   clientIcon: {
-    backgroundColor: '#4680FF',
+    backgroundColor: '#4CAF50',
     borderRadius: 20,
     paddingHorizontal: 30,
     paddingVertical: 40,

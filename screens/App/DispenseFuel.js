@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-kitten/components';
+import axios from 'axios';
 
 const DispenseFuel = () => {
   const { width } = useWindowDimensions();
@@ -31,12 +32,16 @@ const DispenseFuel = () => {
   const [clientsPerPage] = useState(5);
   const [products, setProducts] = useState([]);
   const [productType, setProductType] = useState('');
+  const [productId, setProductId] = useState('');
   const [pricePerLitre, setPricePerLitre] = useState('');
   const [amount, setAmount] = useState('');
   const [agentId, setAgentId] = useState(null);
   const [inputType, setInputType] = useState(''); // New state for tracking input type
+  let SI = null; // Initialize SI outside of useEffect
 
   useEffect(() => {
+    console.log('Client ID:', client.id); // Log the client ID
+
     const fetchAgentId = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
@@ -50,8 +55,8 @@ const DispenseFuel = () => {
     const fetchBalance = async () => {
       try {
         const response = await axios.post(
-          'https://gcnm.wigal.com.gh/getcustomerbalance',
-          { customer_id: client.customerId },
+          'https://gcnm.wigal.com.gh/verifycustomer',
+          { customerphonenumber: client.phonenumber },
           {
             headers: {
               'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
@@ -59,7 +64,7 @@ const DispenseFuel = () => {
           }
         );
         if (response.status === 200 && response.data.statuscode === '00') {
-          setBalance(response.data.data.total_amount); // Update balance state
+          setBalance(response.data.data.balance); // Update balance state
         } else {
           setBalance('0'); // Show 0 if customer has no account
         }
@@ -106,6 +111,10 @@ const DispenseFuel = () => {
       const selectedProduct = products.find(product => product.product_name === productType);
       if (selectedProduct) {
         setPricePerLitre(selectedProduct.price);
+        setProductId(selectedProduct.id); // Set product ID
+        console.log('Selected Product ID:', selectedProduct.id); // Log the product ID
+        SI = selectedProduct.id; // Set SI here
+        console.log('SI:', SI);
       }
     }
   }, [productType, products]);
@@ -125,11 +134,11 @@ const DispenseFuel = () => {
   };
 
   const handleDispenseFuel = async () => {
-    if (!quantity || !productType || !pricePerLitre || !amount) {
+    if (!productType || !quantity || !amount || !pricePerLitre) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-
+  
     try {
       const response = await fetch('https://gcnm.wigal.com.gh/customerdisbursement', {
         method: 'POST',
@@ -138,14 +147,14 @@ const DispenseFuel = () => {
         },
         body: JSON.stringify({
           agent_id: agentId,
-          customer_id: client.clientid,  
-          product_id: '47', // Update this with the relevant product ID
+          customer_id: client.id,
+          product_id: productId, // Use the selected product ID
           price: pricePerLitre,
           quantity,
-          amount: '0',
+          amount,
         }),
       });
-
+  
       const data = await response.json();
       if (data.statuscode === '00') {
         Alert.alert('Success', 'Fuel dispensed successfully.');
@@ -158,6 +167,22 @@ const DispenseFuel = () => {
       Alert.alert('Error', 'An error occurred while dispensing fuel.');
     }
   };
+  
+
+  const InputField = ({ label, value, onChangeText, placeholder, editable = true, keyboardType = 'default' }) => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <TextInput
+        style={[styles.input, !editable && styles.readOnlyInput]}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        editable={editable}
+        keyboardType={keyboardType}
+        placeholderTextColor="#a0a0a0"
+      />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -166,95 +191,66 @@ const DispenseFuel = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title1}>Dispense Fuel</Text>
+          <Text style={styles.title}>Dispense Fuel</Text>
           
-          {/* Client Information Card */}
           <View style={styles.clientCard}>
-            <View style={styles.clientCardHeader}>
-              <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
-              <View>
-                <Text style={styles.clientName}>{client.name}</Text>
-                <Text style={styles.clientPhone}>{client.phonenumber}</Text>
-                <Text style={styles.clientAmount}>gh₵{balance}</Text>
-              </View>
+            <View style={styles.clientIconContainer}>
+              <Icon name="person" size={40} color="#fff" />
+            </View>
+            <View style={styles.clientInfo}>
+              <Text style={styles.clientName}>{client.name}</Text>
+              <Text style={styles.clientPhone}>{client.phonenumber}</Text>
+              <Text style={styles.clientAmount}>GH₵ {balance}</Text>
             </View>
           </View>
 
-          <Text style={styles.title}>Dispense Fuel</Text>
-         
-          <Text style={styles.label}>Select Product Type</Text>
-          
-          
+          <View style={styles.formContainer}>
+            <Text style={styles.formLabel}>Select Product Type</Text>
             <Select
               selectedIndex={new IndexPath(0)}
               onSelect={index => setProductType(products[index.row].product_name)}
               value={productType || 'Select your product type'}
-              style={styles.dropdown}
+              style={styles.select}
             >
               {products.map((product, index) => (
                 <SelectItem key={index} title={product.product_name} />
               ))}
             </Select>
-            <TouchableOpacity>
-              <Icon size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-     
-          
-          <Text style={styles.label}>Display Price Per Litre</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              placeholder="Price per litre"
+
+            <InputField
+              label="Price Per Litre"
               value={pricePerLitre}
               editable={false}
-              style={[styles.inputt, styles.readOnlyInput, { flex: 1, borderColor: '#FFFFFF' }]}
-              placeholderTextColor="#a0a0a0"
-              keyboardType='numeric'
+              placeholder="Price per litre"
+              keyboardType="numeric"
             />
-            <TouchableOpacity>
-              <Icon name='' size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
-          
-          <Text style={styles.label}>Qty (Litres)</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              placeholder="Enter quantity"
+
+            <InputField
+              label="Quantity (Litres)"
               value={quantity}
               onChangeText={(text) => {
                 setInputType('quantity');
                 setQuantity(text);
               }}
-              style={[styles.inputt, { flex: 1, borderColor: '#FFFFFF' }]}
-              keyboardType='numeric'
-              placeholderTextColor="#a0a0a0"
+              placeholder="Enter quantity"
+              keyboardType="numeric"
             />
-            <TouchableOpacity>
-              <Icon name='' size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
-          
-          <Text style={styles.label}>Amount (GHS)</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              placeholder="Amount"
+
+            <InputField
+              label="Amount (GHS)"
               value={amount}
               onChangeText={(text) => {
                 setInputType('amount');
                 setAmount(text);
               }}
-              editable={true}
-              style={[styles.inputt, { flex: 1, borderColor: '#FFFFFF' }]}
-              keyboardType='numeric'
-              placeholderTextColor="#a0a0a0"
+              placeholder="Amount"
+              keyboardType="numeric"
             />
-            <TouchableOpacity>
-              <Icon name='' size={24} color="#a0a0a0" />
+
+            <TouchableOpacity style={styles.button} onPress={handleDispenseFuel}>
+              <Text style={styles.buttonText}>Dispense Fuel</Text>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity style={styles.button} onPress={handleDispenseFuel}>
-            <Text style={styles.buttonText}>Dispense</Text>
-          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -264,75 +260,89 @@ const DispenseFuel = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F8FD',
+    backgroundColor: '#f5f6fa',
   },
   scrollContainer: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  title1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
+    padding: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
+    color: '#2c3e50',
+    textAlign: 'center',
   },
   clientCard: {
-    backgroundColor: '#d3d3d3',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 20,
-    elevation: 2,
-  },
-  clientCardHeader: {
     flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  clientIcon: {
-    marginRight: 16,
+  clientIconContainer: {
+    backgroundColor: '#3498db',
+    borderRadius: 50,
+    padding: 15,
+    marginRight: 15,
+  },
+  clientInfo: {
+    flex: 1,
   },
   clientName: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#2c3e50',
   },
   clientPhone: {
     fontSize: 14,
-    color: '#888',
+    color: '#7f8c8d',
+    marginTop: 5,
   },
   clientAmount: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#27ae60',
+    marginTop: 10,
+  },
+  formContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  formLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 10,
+  },
+  select: {
+    marginBottom: 20,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    color: '#2c3e50',
+    marginBottom: 5,
+  },
+  input: {
     borderWidth: 1,
+    borderColor: '#dcdde1',
     borderRadius: 8,
-    borderColor: '#E5E5E5',
-    paddingHorizontal: 8,
-  },
-  dropdown: {
-    flex: 1,
+    paddingHorizontal: 15,
     paddingVertical: 10,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#E5E5E5',
-    paddingHorizontal: 8,
-  },
-  inputt: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
     fontSize: 16,
   },
   readOnlyInput: {
@@ -340,15 +350,15 @@ const styles = StyleSheet.create({
     color: '#a0a0a0',
   },
   button: {
-    backgroundColor: '#5d79ff',
-    paddingVertical: 16,
+    backgroundColor: '#3498db',
+    paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 20,
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

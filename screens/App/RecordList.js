@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const StockProductList = ({ navigation }) => {
+const RecordList = ({ navigation }) => {
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
   useEffect(() => {
@@ -30,7 +30,7 @@ const StockProductList = ({ navigation }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://gcnm.wigal.com.gh/fetchProductsupplylist', {
+        const response = await fetch('https://gcnm.wigal.com.gh/fetchStocklist', {
           method: 'POST',
           headers: {
             
@@ -80,12 +80,12 @@ const StockProductList = ({ navigation }) => {
         <Text style={styles.productName}>{item.product_name}</Text>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Supplied Quantity:</Text>
-            <Text style={styles.detailValue}>{item.supplied_delivered_quantity}</Text>
+            <Text style={styles.detailLabel}>Dispensed Quantity:</Text>
+            <Text style={styles.detailValue}>{item.dispensed_quantity}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Supplied Date:</Text>
-            <Text style={styles.detailValue}>{item.supplied_date}</Text>
+            <Text style={styles.detailLabel}>Recorded Date:</Text>
+            <Text style={styles.detailValue}>{item.recorded_date}</Text>
           </View>
         </View>
       </View>
@@ -94,7 +94,7 @@ const StockProductList = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.label}>Product List</Text>
+        <Text style={styles.label}>Record List</Text>
       </View>
       <FlatList
         data={productData}
@@ -106,7 +106,7 @@ const StockProductList = ({ navigation }) => {
   );
 };
 
-export default StockProductList;
+export default RecordList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

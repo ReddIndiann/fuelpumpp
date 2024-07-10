@@ -12,12 +12,11 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
-import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
+import { Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StockRecords = () => {
@@ -79,34 +78,44 @@ const StockRecords = () => {
     }
   };
 
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleVehicleArrivalDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || vehicleArrivalDate;
     setShowVehicleArrivalDatePicker(false);
     setVehicleArrivalDate(currentDate);
+    console.log('Selected Vehicle Arrival Date:', formatDate(currentDate));
   };
 
   const handleDippingTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || dippingTime;
     setShowDippingTimePicker(false);
     setDippingTime(currentTime);
+    console.log('Selected Dipping Time:', currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
   const handleSubmit = () => {
-    if (!agentId) {
-      Alert.alert('Error', 'Agent ID not found.');
+    // Validate all fields are filled
+    if (!agentId || !selectedProductId || !dippingQuantity || !dispenserQuantity) {
+      Alert.alert('Error', 'Please fill all form inputs before proceeding.');
       return;
     }
-
+  
     const payload = {
       agent_id: agentId,
       location_id: "3",
       product_id: selectedProductId,
-      record_date: vehicleArrivalDate.toISOString().split('T')[0],
+      record_date: formatDate(vehicleArrivalDate),
       dipping_time: dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       dipping_quantity: dippingQuantity,
       dispenser_qunatity: dispenserQuantity,
     };
-
+  
     axios.post('https://gcnm.wigal.com.gh/stockrecords', payload, {
       headers: {
         'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
@@ -115,7 +124,7 @@ const StockRecords = () => {
     .then(response => {
       console.log(response.data);
       Alert.alert('Success', 'Stock record saved successfully', [
-        { text: 'OK', onPress: () => navigation.navigate('RecordProductList') }
+        { text: 'OK', onPress: () => navigation.navigate('RecordList') }
       ]);
     })
     .catch(error => {
@@ -123,7 +132,8 @@ const StockRecords = () => {
       Alert.alert('Error', 'Failed to save stock record');
     });
   };
-
+  
+console.log(selectedProductId)
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -132,9 +142,7 @@ const StockRecords = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Stock Records</Text>
-          <Text style={styles.pageinfo}>
-            Lorem ipsum dolor sit amet
-          </Text>
+          
           <Text style={styles.label}>Select Product Type</Text>
           <Select
             size='large'
@@ -240,18 +248,13 @@ const styles = StyleSheet.create({
     fontSize: 30,
     alignSelf: 'flex-start',
     marginLeft: 20,
+    marginBottom: '6%',
   },
   label: {
     color: '#000000',
     fontSize: 20,
-    alignSelf: "flex-start",
-    marginLeft: "6%",
-  },
-  pageinfo: {
-    fontSize: 20,
     alignSelf: 'flex-start',
-    marginLeft: 20,
-    marginBottom: 20,
+    marginLeft: '6%',
   },
   inputContainer: {
     width: '90%',
@@ -262,6 +265,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#a0a0a0',
+    backgroundColor: '#fff',
   },
   input: {
     width: '90%',
@@ -272,10 +276,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#a0a0a0',
+    backgroundColor: '#fff',
   },
   buttonContainer: {
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginVertical: 20,
   },
   button: {
@@ -287,7 +292,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 60,
     borderRadius: 10,
-    marginRight: 20,
     alignItems: 'center',
   },
   tabletButton: {
@@ -310,29 +314,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#000',
   },
-  dropdownText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  dropdownOptionText: {
-    fontSize: 18,
-    paddingLeft: 15,
-    paddingVertical: 10,
-  },
   select: {
     width: '95%',
     borderWidth: 0,
     paddingLeft: 15,
-    marginRight:"5%",
+    marginRight: '5%',
     backgroundColor: 'transparent',
-    height:'10%',
-  
-  },
-  dropdownContainer: {
-    width: '90%',
-    borderColor: '#a0a0a0',
-    borderWidth: 1,
-    borderRadius: 10,
-    marginTop: 10,
+    height: '6%',
   },
 });

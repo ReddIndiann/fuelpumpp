@@ -117,7 +117,7 @@ const AppTabs = () => {
             </View>
           );
         },
-        tabBarActiveTintColor: 'dodgerblue',
+        tabBarActiveTintColor: '#007B5D',
         tabBarInactiveTintColor: 'gray',
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -137,17 +137,17 @@ const AppTabs = () => {
           headerTransparent: false,
           headerLeft: () => (
             <View style={{ marginLeft: 10 }}>
-              <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 30, justifyContent: "center", alignItems: "center" }}>
+              <TouchableOpacity onPress={() => navigation.navigate('profile')} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 30, justifyContent: "center", alignItems: "center" }}>
                 <Ionicons name="person-outline" size={24} color="black" />
               </TouchableOpacity>
             </View>
           ),
           headerTitle: () => (
             <View style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: 'center', justifyContent: "center" }}>
-              <Text style={{ color: "#c0c0c0" }}>
+              <Text style={{ color: "black",fontSize: 15  }}>
                 {greeting}!
               </Text>
-              <Text style={{ fontSize: 18 }}>
+              <Text style={{ fontSize: 20 }}>
                 {userName}
               </Text>
             </View>

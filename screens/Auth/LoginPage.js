@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     alignSelf: 'flex-start',
     marginLeft: 20,
+    marginBottom:"6%"
   },
   forgotpassword: {
     fontSize: 18,
@@ -211,23 +212,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#007B5D',
     borderWidth: 1,
     justifyContent: 'center',
+    alignContent:'center',
     borderRadius: 10,
-    marginRight: 20,
+    
     alignItems: 'center',
   },
   buttonDisabled: {
     backgroundColor: '#a0a0a0',
     borderColor: '#a0a0a0',
   },
-  button1: {
-    width: 300,
-    height: 50,
-    justifyContent: 'center',
-    marginTop: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    backgroundColor: '#F0F2F5',
-  },
+ 
   tabletButton: {
     width: 240,
     height: 80,

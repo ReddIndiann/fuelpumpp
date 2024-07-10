@@ -8,14 +8,15 @@ import {
   TextInput,
   useWindowDimensions,
   KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   ActivityIndicator,
+  Platform,
   FlatList,
+  StatusBar,
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const Customer = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,10 +62,9 @@ const Customer = () => {
   const handleSearch = (text) => {
     setSearchQuery(text);
   };
-
   const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phoneNumber.includes(searchQuery)
+    (client.name && client.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (client.phoneNumber && client.phoneNumber.includes(searchQuery))
   );
 
   const renderClient = ({ item }) => (
@@ -72,8 +72,16 @@ const Customer = () => {
       style={styles.card}
       onPress={() => navigation.navigate('existingclienttransaction', { client: item })}
     >
-      <Text style={styles.cardText}>{item.name}</Text>
-      <Text style={styles.cardText}>{item.phonenumber}</Text>
+      <View style={styles.avatarContainer}>
+        <Text style={styles.avatarText}>
+          {item.name && item.name.length > 0 ? item.name[0].toUpperCase() : '#'}
+        </Text>
+      </View>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardName}>{item.name || 'Unnamed Client'}</Text>
+        <Text style={styles.cardPhone}>{item.phonenumber || 'No phone number'}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={24} color="#007B5D" />
     </TouchableOpacity>
   );
 
@@ -87,21 +95,19 @@ const Customer = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f3f3" />
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-      
-          <Text style={styles.pageInfo}>
-
-          </Text>
-          <View style={styles.headerContainer}>
-            <Text style={styles.label}>Existing Customers</Text>
-            <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('addcustomers')}>
-              <Text style={styles.addClientButtonText}>Add New Customers</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Existing Customers</Text>
+          <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('addcustomers')}>
+            <Ionicons name="add" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#a0a0a0" style={styles.searchIcon} />
           <TextInput
             placeholder="Search by name or number"
             value={searchQuery}
@@ -109,111 +115,117 @@ const Customer = () => {
             style={styles.searchInput}
             placeholderTextColor="#a0a0a0"
           />
-          <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>Name</Text>
-              <Text style={styles.tableHeaderText}>Phone Number</Text>
-            </View>
-            <FlatList
-              data={filteredClients}
-              renderItem={renderClient}
-              keyExtractor={(item, index) => index.toString()}
-              style={styles.flatList}
-              contentContainerStyle={styles.flatListContent}
-            />
-          </View>
-        </ScrollView>
+        </View>
+        <FlatList
+          data={filteredClients}
+          renderItem={renderClient}
+          keyExtractor={(item, index) => index.toString()}
+          style={styles.flatList}
+          contentContainerStyle={styles.flatListContent}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
-export default Customer;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f3f3',
   },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 30,
-    marginBottom: 10,
-  },
-  pageInfo: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  headerContainer: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  label: {
-    fontSize: 17,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
   },
   addClientButton: {
     backgroundColor: '#007B5D',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 50,
   },
-  addClientButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    margin: 20,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchIcon: {
+    marginRight: 10,
   },
   searchInput: {
-    height: 50,
-    borderColor: '#a0a0a0',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingLeft: 15,
-    marginBottom: 20,
-  },
-  tableContainer: {
-    marginBottom: 20,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-  },
-  tableHeaderText: {
     flex: 1,
+    height: 50,
     fontSize: 16,
-    fontWeight: 'bold',
+    color: '#333',
+  },
+  flatList: {
+    flex: 1,
+  },
+  flatListContent: {
+    paddingHorizontal: 20,
   },
   card: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fff',
     padding: 15,
     marginBottom: 10,
     borderRadius: 10,
-  
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 1.84,
-    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  cardText: {
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#007B5D',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  cardContent: {
     flex: 1,
-    fontSize: 16,
   },
-  flatList: {
-    flexGrow: 0,
+  cardName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
   },
-  flatListContent: {
-    paddingBottom: 10,
+  cardPhone: {
+    fontSize: 14,
+    color: '#666',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f4f3f3',
   },
 });
+
+export default Customer;

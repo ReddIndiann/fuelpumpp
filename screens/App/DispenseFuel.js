@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -23,8 +24,8 @@ const DispenseFuel = () => {
   const isTablet = width >= 768;
   const route = useRoute();
   const navigation = useNavigation();
-  const { client } = route.params; // Retrieve client data from route parameters
-  const [balance, setBalance] = useState('0'); // Initial balance state
+  const { client } = route.params;
+  const [balance, setBalance] = useState('0');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -36,17 +37,16 @@ const DispenseFuel = () => {
   const [pricePerLitre, setPricePerLitre] = useState('');
   const [amount, setAmount] = useState('');
   const [agentId, setAgentId] = useState(null);
-  const [inputType, setInputType] = useState(''); // New state for tracking input type
-  let SI = null; // Initialize SI outside of useEffect
+  const [inputType, setInputType] = useState('');
+
+  const scrollViewRef = useRef(null);
 
   useEffect(() => {
-    console.log('Client ID:', client.id); // Log the client ID
-
     const fetchAgentId = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
-        setAgentId(user?.id); // Adjust this based on your user object structure
+        setAgentId(user?.id);
       } catch (error) {
         console.error('Failed to fetch agent ID:', error);
       }
@@ -64,12 +64,12 @@ const DispenseFuel = () => {
           }
         );
         if (response.status === 200 && response.data.statuscode === '00') {
-          setBalance(response.data.data.balance); // Update balance state
+          setBalance(response.data.data.balance);
         } else {
-          setBalance('0'); // Show 0 if customer has no account
+          setBalance('0');
         }
       } catch (error) {
-        setBalance('0'); // Show 0 in case of an error
+        setBalance('0');
       }
     };
 
@@ -111,10 +111,7 @@ const DispenseFuel = () => {
       const selectedProduct = products.find(product => product.product_name === productType);
       if (selectedProduct) {
         setPricePerLitre(selectedProduct.price);
-        setProductId(selectedProduct.id); // Set product ID
-        console.log('Selected Product ID:', selectedProduct.id); // Log the product ID
-        SI = selectedProduct.id; // Set SI here
-        console.log('SI:', SI);
+        setProductId(selectedProduct.id);
       }
     }
   }, [productType, products]);
@@ -134,11 +131,19 @@ const DispenseFuel = () => {
   };
 
   const handleDispenseFuel = async () => {
-    if (!productType || !quantity || !amount || !pricePerLitre) {
+    if (!quantity || !productType || !pricePerLitre || !amount) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-  
+
+    const numericBalance = parseFloat(balance);
+    const numericAmount = parseFloat(amount);
+
+    if (numericAmount > numericBalance) {
+      Alert.alert('Error', 'Insufficient balance.');
+      return;
+    }
+
     try {
       const response = await fetch('https://gcnm.wigal.com.gh/customerdisbursement', {
         method: 'POST',
@@ -148,17 +153,17 @@ const DispenseFuel = () => {
         body: JSON.stringify({
           agent_id: agentId,
           customer_id: client.id,
-          product_id: productId, // Use the selected product ID
+          product_id: productId,
           price: pricePerLitre,
           quantity,
-          amount,
+          amount: amount,
         }),
       });
-  
+
       const data = await response.json();
       if (data.statuscode === '00') {
         Alert.alert('Success', 'Fuel dispensed successfully.');
-        navigation.navigate('Home'); // Adjust this to navigate to the appropriate screen
+        navigation.navigate('Home');
       } else {
         Alert.alert('Error', data.message || 'Failed to dispense fuel.');
       }
@@ -167,7 +172,6 @@ const DispenseFuel = () => {
       Alert.alert('Error', 'An error occurred while dispensing fuel.');
     }
   };
-  
 
   const InputField = ({ label, value, onChangeText, placeholder, editable = true, keyboardType = 'default' }) => (
     <View style={styles.inputContainer}>
@@ -180,6 +184,7 @@ const DispenseFuel = () => {
         editable={editable}
         keyboardType={keyboardType}
         placeholderTextColor="#a0a0a0"
+        blurOnSubmit={false}
       />
     </View>
   );
@@ -189,8 +194,14 @@ const DispenseFuel = () => {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
+        >
           <Text style={styles.title}>Dispense Fuel</Text>
           
           <View style={styles.clientCard}>
@@ -208,7 +219,10 @@ const DispenseFuel = () => {
             <Text style={styles.formLabel}>Select Product Type</Text>
             <Select
               selectedIndex={new IndexPath(0)}
-              onSelect={index => setProductType(products[index.row].product_name)}
+              onSelect={(index) => {
+                setProductType(products[index.row].product_name);
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              }}
               value={productType || 'Select your product type'}
               style={styles.select}
             >
@@ -247,7 +261,11 @@ const DispenseFuel = () => {
               keyboardType="numeric"
             />
 
-            <TouchableOpacity style={styles.button} onPress={handleDispenseFuel}>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={handleDispenseFuel}
+              activeOpacity={0.8}
+            >
               <Text style={styles.buttonText}>Dispense Fuel</Text>
             </TouchableOpacity>
           </View>
@@ -256,6 +274,8 @@ const DispenseFuel = () => {
     </SafeAreaView>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {

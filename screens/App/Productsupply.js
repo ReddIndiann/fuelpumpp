@@ -126,7 +126,7 @@ const ProductSupply = () => {
       );
       console.log('Product supply saved successfully:', response.data);
       Alert.alert('Success', 'Product supply saved successfully', [
-        { text: 'OK', onPress: () => navigation.navigate('stockProductList') }
+        { text: 'OK', onPress: () => navigation.navigate('StockProductList') }
       ]);
     } catch (error) {
       console.error('Error saving product supply:', error);
@@ -135,245 +135,223 @@ const ProductSupply = () => {
   };
   
 console.log(selectedProductId)
-  return (
-    <SafeAreaView style={styles.container}>
+return (
+  <SafeAreaView style={styles.container}>
+    
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Product Supply</Text>
-          
+       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <Text style={styles.title}>Product Supply</Text>
+        
+        <View style={styles.formGroup}>
           <Text style={styles.label}>Select Product Type</Text>
           <Select
-            size='large'
+            style={styles.select}
             selectedIndex={selectedProductType}
             onSelect={index => {
               setSelectedProductType(index);
               const selectedProduct = products[index.row];
-              setSelectedProductId(selectedProduct.id); // Set the selected product ID
-              console.log(`Selected Product - ID: ${selectedProduct.id}, Name: ${selectedProduct.product_name}`);
+              setSelectedProductId(selectedProduct.id);
             }}
             value={products[selectedProductType.row]?.product_name || 'Select your product type'}
-            style={styles.select}
           >
             {products.map((product, index) => (
               <SelectItem key={index} title={product.product_name} />
             ))}
           </Select>
+        </View>
 
-          <Text style={styles.label}>Select Date of Vehicle Arrival</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {vehicleArrivalDate.toLocaleDateString()}
-              </Text>
-              <Icon name="calendar-today" size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Date of Vehicle Arrival</Text>
+          <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
+            <Text style={styles.datePickerText}>
+              {vehicleArrivalDate.toLocaleDateString()}
+            </Text>
+            <Icon name="calendar-today" size={24} color="#007B5D" />
+          </TouchableOpacity>
+        </View>
+        {showVehicleArrivalDatePicker && (
+          <DateTimePicker
+            value={vehicleArrivalDate}
+            mode="date"
+            display="default"
+            onChange={handleVehicleArrivalDateChange}
+            minimumDate={new Date()}
+          />
+        )}
 
-          {showVehicleArrivalDatePicker && (
-            <DateTimePicker
-              value={vehicleArrivalDate}
-              mode="date"
-              display="default"
-              onChange={handleVehicleArrivalDateChange}
-              minimumDate={new Date()}
-            />
-          )}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Delivery Date</Text>
+          <TouchableOpacity onPress={() => setShowDeliveryDatePicker(true)} style={styles.datePickerButton}>
+            <Text style={styles.datePickerText}>
+              {deliveryDate.toLocaleDateString()}
+            </Text>
+            <Icon name="calendar-today" size={24} color="#007B5D" />
+          </TouchableOpacity>
+        </View>
+        {showDeliveryDatePicker && (
+          <DateTimePicker
+            value={deliveryDate}
+            mode="date"
+            display="default"
+            onChange={handleDeliveryDateChange}
+            minimumDate={new Date()}
+          />
+        )}
 
-          <Text style={styles.label}>Select Delivery Date</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={() => setShowDeliveryDatePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {deliveryDate.toLocaleDateString()}
-              </Text>
-              <Icon name="calendar-today" size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Quantity Delivered</Text>
+          <TextInput
+            placeholder="Enter quantity"
+            value={quantityDelivered}
+            onChangeText={(text) => setQuantityDelivered(text)}
+            style={styles.input}
+            placeholderTextColor="#a0a0a0"
+            keyboardType="numeric"
+          />
+        </View>
 
-          {showDeliveryDatePicker && (
-            <DateTimePicker
-              value={deliveryDate}
-              mode="date"
-              display="default"
-              onChange={handleDeliveryDateChange}
-              minimumDate={new Date()}
-            />
-          )}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Vehicle Number</Text>
+          <TextInput
+            placeholder="Enter number"
+            value={vehicleNumber}
+            onChangeText={(text) => setVehicleNumber(text)}
+            style={styles.input}
+            placeholderTextColor="#a0a0a0"
+          />
+        </View>
 
-          <Text style={styles.label}>Enter Quantity Delivered</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter quantity"
-              value={quantityDelivered}
-              onChangeText={(text) => setQuantityDelivered(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-              keyboardType="numeric"
-            />
-          </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Driver Name</Text>
+          <TextInput
+            placeholder="Enter name"
+            value={driverName}
+            onChangeText={(text) => setDriverName(text)}
+            style={styles.input}
+            placeholderTextColor="#a0a0a0"
+          />
+        </View>
 
-          <Text style={styles.label}>Enter Vehicle Number</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter number"
-              value={vehicleNumber}
-              onChangeText={(text) => setVehicleNumber(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-            />
-          </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Driver Number</Text>
+          <TextInput
+            placeholder="Enter number"
+            value={driverNumber}
+            onChangeText={(text) => setDriverNumber(text)}
+            style={styles.input}
+            placeholderTextColor="#a0a0a0"
+            keyboardType="numeric"
+          />
+        </View>
 
-          <Text style={styles.label}>Enter Driver Name</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter name"
-              value={driverName}
-              onChangeText={(text) => setDriverName(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-            />
-          </View>
-
-          <Text style={styles.label}>Enter Driver Number</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              placeholder="Enter number"
-              value={driverNumber}
-              onChangeText={(text) => setDriverNumber(text)}
-              style={styles.input}
-              placeholderTextColor="#a0a0a0"
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, isTablet && styles.tabletButton]}
-              onPress={handleSave}
-            >
-              <Text style={styles.signInText}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+        >
+          <Text style={styles.buttonText}>Save</Text>
+        </TouchableOpacity>
+      </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+);
 };
-export default ProductSupply;
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#007B5D',
+  },
+  addButton: {
+    backgroundColor: '#007B5D',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
   },
-  title: {
-    fontSize: 30,
-    alignSelf: 'flex-start',
-    marginLeft: 20,
-    marginBottom:"6%"
-  },
-  label: {
-    color: '#000000',
-    fontSize: 20,
-    alignSelf: "flex-start",
-    marginLeft: "6%",
-  },
-  pageinfo: {
-    fontSize: 20,
-    alignSelf: 'flex-start',
-    marginLeft: 20,
-    marginBottom: 20,
-  },
-  input: {
-    width: '100%',
-    height: '100%',
-    fontSize: 18,
-  },
-  datePickerButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-  },
-  datePickerText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  inputContainer: {
-    width: '90%',
-    height: 50,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    backgroundColor: '#fff',
-  },
-  buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignContent: 'center',
-    marginVertical: 20,
-  },
-  button: {
-    width: 320,
-    height: 50,
-    borderColor: '#02B2DD',
-    backgroundColor: '#007B5D',
-    borderWidth: 1,
-    justifyContent: 'center',
-    marginBottom: 60,
-    borderRadius: 10,
-   
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: '#a0a0a0',
-    borderColor: '#a0a0a0',
-  },
-  signInText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-  },
-  dropdownWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-  },
-  select: {
-    width: '95%',
-    borderWidth: 0,
-    paddingLeft: 15,
-    marginRight:"5%",
-    backgroundColor: 'transparent',
-    height:'6%',
-  
-  },
-  dropdownText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  dropdownOptionText: {
-    fontSize: 18,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  dropdownContainer: {
-    width: '80%',
-    marginTop: 10,
-    borderRadius: 10,
-  },
+scrollContainer: {
+  flexGrow: 1,
+  padding: 20,
+},
+title: {
+  fontSize: 28,
+  fontWeight: 'bold',
+  color: '#007B5D',
+  marginBottom: 20,
+},
+formGroup: {
+  marginBottom: 20,
+},
+label: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#333',
+  marginBottom: 8,
+},
+select: {
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderColor: '#ddd',
+},
+datePickerButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#ddd',
+  paddingHorizontal: 12,
+  paddingVertical: 12,
+},
+datePickerText: {
+  fontSize: 16,
+  color: '#333',
+},
+input: {
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#ddd',
+  paddingHorizontal: 12,
+  paddingVertical: 12,
+  fontSize: 16,
+},
+button: {
+  backgroundColor: '#007B5D',
+  borderRadius: 8,
+  paddingVertical: 14,
+  alignItems: 'center',
+  marginTop: "10%",
+  marginBottom:"40%"
+},
+buttonText: {
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: '600',
+},
 });
+
+export default ProductSupply;

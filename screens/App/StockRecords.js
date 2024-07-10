@@ -134,71 +134,72 @@ const StockRecords = () => {
   };
   
 console.log(selectedProductId)
-  return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Stock Records</Text>
-          
+return (
+  <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <Text style={styles.title}>Stock Records</Text>
+        
+        <View style={styles.formGroup}>
           <Text style={styles.label}>Select Product Type</Text>
           <Select
-            size='large'
+            style={styles.select}
             selectedIndex={selectedProductType}
             onSelect={index => {
               setSelectedProductType(index);
               const selectedProduct = products[index.row];
-              setSelectedProductId(selectedProduct.id); // Set the selected product ID
-              console.log(`Selected Product - ID: ${selectedProduct.id}, Name: ${selectedProduct.product_name}, Price: ${selectedProduct.price}`);
+              setSelectedProductId(selectedProduct.id);
             }}
             value={products[selectedProductType.row]?.product_name || 'Select your product type'}
-            style={styles.select}
           >
             {products.map((product, index) => (
               <SelectItem key={index} title={product.product_name} />
             ))}
           </Select>
+        </View>
 
-          <Text style={styles.label}>Select Date of Record</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {vehicleArrivalDate.toLocaleDateString()}
-              </Text>
-              <Icon name="calendar-today" size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
-          {showVehicleArrivalDatePicker && (
-            <DateTimePicker
-              value={vehicleArrivalDate}
-              mode="date"
-              display="default"
-              minimumDate={new Date()}
-              onChange={handleVehicleArrivalDateChange}
-            />
-          )}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Date of Record</Text>
+          <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
+            <Text style={styles.datePickerText}>
+              {vehicleArrivalDate.toLocaleDateString()}
+            </Text>
+            <Icon name="calendar-today" size={24} color="#007B5D" />
+          </TouchableOpacity>
+        </View>
+        {showVehicleArrivalDatePicker && (
+          <DateTimePicker
+            value={vehicleArrivalDate}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={handleVehicleArrivalDateChange}
+          />
+        )}
 
-          <Text style={styles.label}>Select Time of Dipping</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity onPress={() => setShowDippingTimePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
-              <Icon name="access-time" size={24} color="#a0a0a0" />
-            </TouchableOpacity>
-          </View>
-          {showDippingTimePicker && (
-            <DateTimePicker
-              value={dippingTime}
-              mode="time"
-              display="default"
-              onChange={handleDippingTimeChange}
-            />
-          )}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Time of Dipping</Text>
+          <TouchableOpacity onPress={() => setShowDippingTimePicker(true)} style={styles.datePickerButton}>
+            <Text style={styles.datePickerText}>
+              {dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+            <Icon name="access-time" size={24} color="#007B5D" />
+          </TouchableOpacity>
+        </View>
+        {showDippingTimePicker && (
+          <DateTimePicker
+            value={dippingTime}
+            mode="time"
+            display="default"
+            onChange={handleDippingTimeChange}
+          />
+        )}
 
-          <Text style={styles.label}>Enter Dipping Quantity</Text>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Dipping Quantity</Text>
           <TextInput
             placeholder="Enter quantity"
             value={dippingQuantity}
@@ -207,8 +208,10 @@ console.log(selectedProductId)
             keyboardType='numeric'
             placeholderTextColor="#a0a0a0"
           />
+        </View>
 
-          <Text style={styles.label}>Enter Dispenser Quantity</Text>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Dispenser Quantity</Text>
           <TextInput
             placeholder="Enter quantity"
             value={dispenserQuantity}
@@ -217,109 +220,85 @@ console.log(selectedProductId)
             keyboardType='numeric'
             placeholderTextColor="#a0a0a0"
           />
+        </View>
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, isTablet && styles.tabletButton]}
-              onPress={handleSubmit}
-            >
-              <Text style={styles.signInText}>Submit</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+        >
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  </SafeAreaView>
+);
 };
 
-export default StockRecords;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 30,
-    alignSelf: 'flex-start',
-    marginLeft: 20,
-    marginBottom: '6%',
-  },
-  label: {
-    color: '#000000',
-    fontSize: 20,
-    alignSelf: 'flex-start',
-    marginLeft: '6%',
-  },
-  inputContainer: {
-    width: '90%',
-    height: 50,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    backgroundColor: '#fff',
-  },
-  input: {
-    width: '90%',
-    height: 50,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    backgroundColor: '#fff',
-  },
-  buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    marginVertical: 20,
-  },
-  button: {
-    width: 320,
-    height: 50,
-    borderColor: '#02B2DD',
-    backgroundColor: '#007B5D',
-    borderWidth: 1,
-    justifyContent: 'center',
-    marginBottom: 60,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  tabletButton: {
-    width: 240,
-    height: 80,
-  },
-  signInText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-  },
-  datePickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-  },
-  datePickerText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  select: {
-    width: '95%',
-    borderWidth: 0,
-    paddingLeft: 15,
-    marginRight: '5%',
-    backgroundColor: 'transparent',
-    height: '6%',
-  },
+container: {
+  flex: 1,
+  backgroundColor: '#f5f5f5',
+},
+scrollContainer: {
+  flexGrow: 1,
+  padding: 20,
+},
+title: {
+  fontSize: 28,
+  fontWeight: 'bold',
+  color: '#007B5D',
+  marginBottom: 20,
+},
+formGroup: {
+  marginBottom: 20,
+},
+label: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#333',
+  marginBottom: 8,
+},
+select: {
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderColor: '#ddd',
+},
+datePickerButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#ddd',
+  paddingHorizontal: 12,
+  paddingVertical: 12,
+},
+datePickerText: {
+  fontSize: 16,
+  color: '#333',
+},
+input: {
+  backgroundColor: '#fff',
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: '#ddd',
+  paddingHorizontal: 12,
+  paddingVertical: 12,
+  fontSize: 16,
+},
+button: {
+  backgroundColor: '#007B5D',
+  borderRadius: 8,
+  paddingVertical: 14,
+  alignItems: 'center',
+  marginTop: 20,
+},
+buttonText: {
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: '600',
+},
 });
+
+export default StockRecords;

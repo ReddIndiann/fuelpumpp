@@ -10,7 +10,7 @@ import DispenseFuel from "../screens/App/DispenseFuel";
 import AddFunds from "../screens/App/AddFunds";
 import Profile from "../screens/App/Profile";
 import StockRecords from "../screens/App/StockRecords";
-import stockProductList from '../screens/App/StockProductList';
+
 import ProductSupply from "../screens/App/Productsupply";
 import AddCustomers from "../screens/App/AddCustomers";
 import RedrawFund from "../screens/App/WithdrawFund";
@@ -119,12 +119,22 @@ const AppStack = () => {
           headerBackTitle: 'Back',
         }} 
       />
-      <Stack.Screen 
-        name="stockProductList" 
-        component={stockProductList} 
+ 
+       <Stack.Screen 
+        name="StockRecords" 
+        component={StockRecords} 
         options={{ 
           headerShown: true,
           title: 'Stock Product List',
+          headerBackTitle: 'Back',
+        }} 
+      />
+       <Stack.Screen 
+        name="ProductSupply" 
+        component={ProductSupply} 
+        options={{ 
+          headerShown: true,
+          title: 'Stock Product ',
           headerBackTitle: 'Back',
         }} 
       />

@@ -14,6 +14,7 @@ import {
   Modal,
   Alert
 } from 'react-native';
+import { Select, SelectItem } from '@ui-kitten/components';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ModalDropdown from 'react-native-modal-dropdown';
 import axios from 'axios';
@@ -90,7 +91,6 @@ const AddCustomers = () => {
       setIsModalVisible(true);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -100,77 +100,96 @@ const AddCustomers = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Add New Customer</Text>
           
-        <Text style={styles.label}>Enter Name</Text>
-          <TextInput
-            placeholder="Enter your name"
-            value={name}
-            onChangeText={(text) => setName(text)}
-            style={styles.input}
-            placeholderTextColor="#a0a0a0"
-          />
-          <Text style={styles.label}>Enter Email</Text>
-          <TextInput
-            placeholder="Enter Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            style={styles.input}
-            placeholderTextColor="#a0a0a0"
-          />
-          <Text style={styles.label}>Enter Phone Number</Text>
-          <TextInput
-            placeholder="Enter your phone number"
-            value={phoneNumber}
-            onChangeText={(text) => setPhoneNumber(text)}
-            style={styles.input}
-            placeholderTextColor="#a0a0a0"
-          />
-          <Text style={styles.label}>Enter Alternative Phone Number</Text>
-          <TextInput
-            placeholder="Enter alternative phone number"
-            value={alternativePhoneNumber}
-            onChangeText={(text) => setAlternativePhoneNumber(text)}
-            style={styles.input}
-            placeholderTextColor="#a0a0a0"
-          />
-          <Text style={styles.label}>Select ID card type</Text>
-          <View style={styles.inputContainer}>
-            <ModalDropdown
-              options={['ghana_card', 'ID Card Type 2', 'ID Card Type 3']}
-              defaultValue="Select your ID card type"
-              style={styles.dropdown}
-              textStyle={styles.dropdownText}
-              dropdownTextStyle={styles.dropdownListText}
-              onSelect={(index, value) => setIdCardType(value)}
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              placeholder="Enter your name"
+              value={name}
+              onChangeText={(text) => setName(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
             />
-            <TouchableOpacity>
-              <Icon size={24} color="#a0a0a0" />
-            </TouchableOpacity>
           </View>
-          <Text style={styles.label}>Enter ID Card Number</Text>
-          <TextInput
-            placeholder="Id card number"
-            value={idCardNumber}
-            onChangeText={(text) => setIdCardNumber(text)}
-            style={styles.input}
-            placeholderTextColor="#a0a0a0"
-          />
-          <Text style={styles.label}>Enter Wallet Number</Text>
-          <TextInput
-            placeholder="Enter wallet number"
-            value={walletNumber}
-            onChangeText={(text) => setWalletNumber(text)}
-            style={styles.input}
-            placeholderTextColor="#a0a0a0"
-          />
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, !isButtonEnabled && styles.buttonDisabled, isTablet && styles.tabletButton]}
-              onPress={handleAddClient}
-              disabled={!isButtonEnabled}
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              placeholder="Enter Email"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Phone Number</Text>
+            <TextInput
+              placeholder="Enter your phone number"
+              value={phoneNumber}
+              onChangeText={(text) => setPhoneNumber(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Alternative Phone Number</Text>
+            <TextInput
+              placeholder="Enter alternative phone number"
+              value={alternativePhoneNumber}
+              onChangeText={(text) => setAlternativePhoneNumber(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>ID Card Type</Text>
+            <Select
+              style={styles.select}
+              selectedIndex={idCardType}
+              onSelect={(index) => setIdCardType(index)}
+              value={idCardType || 'Select your ID card type'}
             >
-              <Text style={styles.signInText}>Add Customers</Text>
-            </TouchableOpacity>
+              <SelectItem title="Ghana Card" />
+              <SelectItem title="ID Card Type 2" />
+              <SelectItem title="ID Card Type 3" />
+            </Select>
           </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>ID Card Number</Text>
+            <TextInput
+              placeholder="Id card number"
+              value={idCardNumber}
+              onChangeText={(text) => setIdCardNumber(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Wallet Number</Text>
+            <TextInput
+              placeholder="Enter wallet number"
+              value={walletNumber}
+              onChangeText={(text) => setWalletNumber(text)}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.button, !isButtonEnabled && styles.buttonDisabled]}
+            onPress={handleAddClient}
+            disabled={!isButtonEnabled}
+          >
+            <Text style={styles.buttonText}>Add Customer</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -178,13 +197,11 @@ const AddCustomers = () => {
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => {
-          setIsModalVisible(!isModalVisible);
-        }}
+        onRequestClose={() => setIsModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <TouchableOpacity style={styles.modalIconContainer} onPress={() => setIsModalVisible(false)}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsModalVisible(false)}>
               <Icon name="close" size={24} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.modalMessage}>Failed to add Customer</Text>
@@ -195,116 +212,83 @@ const AddCustomers = () => {
   );
 };
 
-export default AddCustomers;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
   },
   title: {
-    fontSize: 25,
-    alignSelf: 'flex-start',
-    marginLeft: 20,
-    marginBottom:"10%"
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#007B5D',
+    marginBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
   },
   label: {
-    color: '#000000',
-    fontSize: 20,
-    alignSelf: 'flex-start',
-    marginLeft: "6%",
-  },
-  pageinfo: {
-    fontSize: 20,
-    alignSelf: 'flex-start',
-    marginLeft: 20,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
   },
   input: {
-    width: '90%',
-    height: 45,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#a0a0a0',
+    borderColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
   },
-  inputContainer: {
-    width: '90%',
-    height: 50,
-    borderRadius: 10,
-    fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  dropdown: {
-    flex: 1,
-  },
-  dropdownText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  dropdownListText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    marginVertical: 20,
+  select: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderColor: '#ddd',
   },
   button: {
-    width: 320,
-    height: 50,
-    borderColor: '#02B2DD',
     backgroundColor: '#007B5D',
-    borderWidth: 1,
-    justifyContent: 'center',
-    marginBottom: 15,
-    borderRadius: 10,
-    marginRight: 20,
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
+    marginTop: 20,
   },
   buttonDisabled: {
     backgroundColor: '#a0a0a0',
-    borderColor: '#a0a0a0',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
+    backgroundColor: '#D32F2F',
+    borderRadius: 8,
+    padding: 20,
     width: '90%',
-    marginRight: 10,
-    backgroundColor: '#D32F2F',
-    borderRadius: 10,
     alignItems: 'center',
-    flexDirection: "row",
-    padding: 10,
   },
-  modalIconContainer: {
-    width: '15%',
-    alignItems: 'center',
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#D32F2F',
-    borderRadius: 5,
+  modalCloseButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
   modalMessage: {
-    fontSize: 16,
-    marginBottom: 20,
     color: '#fff',
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
+
+export default AddCustomers;

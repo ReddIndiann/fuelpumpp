@@ -6,32 +6,27 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import ModalDropdown from 'react-native-modal-dropdown';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddFunds = ({ route, navigation }) => {
-  const { client } = route.params; // Get client data from navigation params
-  const [balance, setBalance] = useState('0'); // Initial balance state
-
+  const { client } = route.params;
+  const [balance, setBalance] = useState('0');
   const [amount, setAmount] = useState('');
   const [agentId, setAgentId] = useState('');
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
 
   useEffect(() => {
     const fetchAgentId = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
-        setAgentId(user?.id); // Adjust this based on your user object structure
+        setAgentId(user?.id);
       } catch (error) {
         console.error('Failed to fetch agent ID:', error);
       }
@@ -54,9 +49,7 @@ const AddFunds = ({ route, navigation }) => {
           setBalance('0'); // Show 0 if customer has no account
         }
       } catch (error) {
-     
         setBalance('0'); // Show 0 in case of an error
-    
       }
     };
 
@@ -64,14 +57,17 @@ const AddFunds = ({ route, navigation }) => {
     fetchBalance();
   }, [client.customerId]);
 
-
   const handleAddFunds = () => {
+    if (!amount) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
     const data = {
       agent_id: agentId,
-      customer_id: client.clientid, // Fetch customer ID from client data
+      customer_id: client.clientid,
       amount: amount,
-      wallet: client.wallet_number, // Fetch wallet from client data
-      paymentoption: client.payment_option, // Fetch payment option from client data
+      wallet: client.wallet_number,
+      paymentoption: client.payment_option,
     };
 
     axios.post('https://gcnm.wigal.com.gh/loadfunds', data, {
@@ -80,18 +76,16 @@ const AddFunds = ({ route, navigation }) => {
       }
     })
       .then(response => {
-        // Handle success
         Alert.alert('Success', 'Funds added successfully.', [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]);
       })
       .catch(error => {
-        // Handle error
         Alert.alert('Error', 'Failed to add funds.');
         console.error(error);
       });
   };
-console.log(client.clientid)
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -100,44 +94,34 @@ console.log(client.clientid)
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Add Funds</Text>
-
-          {/* Client Information Card */}
+          
           <View style={styles.clientCard}>
-            <View style={styles.clientCardHeader}>
-              <Icon name="person" size={40} color="#fff" style={styles.clientIcon} />
-              <View>
-                <Text style={styles.clientName}>{client.name}</Text>
-                <Text style={styles.clientPhone}>{client.phonenumber}</Text>
-                <Text style={styles.clientAmount}>GH₵ {balance}</Text>
-              </View>
+            <View style={styles.clientIconContainer}>
+              <Icon name="person" size={40} color="#fff" />
+            </View>
+            <View style={styles.clientInfo}>
+              <Text style={styles.clientName}>{client.name}</Text>
+              <Text style={styles.clientPhone}>{client.phonenumber}</Text>
+              <Text style={styles.clientAmount}>GH₵ {balance}</Text>
             </View>
           </View>
 
-          {/* Add Funds Form */}
-          <Text style={styles.label}>Enter Amount</Text>
-          <View style={styles.passwordContainer}>
+          <View style={styles.formContainer}>
+            <Text style={styles.formLabel}>Enter Amount</Text>
             <TextInput
+              style={styles.input}
               placeholder="Enter amount"
               onChangeText={(text) => setAmount(text)}
-              style={[styles.inputt, { flex: 1, borderColor: '#FFFFFF' }]}
-              placeholderTextColor="#a0a0a0"
               keyboardType="numeric"
+              placeholderTextColor="#a0a0a0"
             />
-          </View>
 
-          {/* Buttons */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleAddFunds}
-            >
-              <Text style={styles.signInText}>Add Funds</Text>
+            <TouchableOpacity style={styles.addButton} onPress={handleAddFunds}>
+              <Text style={styles.buttonText}>Add Funds</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button1}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.signUpText}>Cancel</Text>
+
+            <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -146,140 +130,107 @@ console.log(client.clientid)
   );
 };
 
-export default AddFunds;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f6fa',
   },
   scrollContainer: {
-    flexGrow: 1,
     padding: 20,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '300',
+    fontSize: 28,
+    fontWeight: 'bold',
     marginBottom: 20,
+    color: '#2c3e50',
+    textAlign: 'center',
   },
   clientCard: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 20,
-    elevation: 2,
-    height:'20%'
-  },
-  clientCardHeader: {
     flexDirection: 'row',
-    borderRadius: 20,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  button: {
-    width: 330,
-    height: 50,
-    backgroundColor: '#FAAD14',
-    justifyContent: 'center',
-    borderRadius: 10,
-    marginRight: 20,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    backgroundColor: '#a0a0a0',
-    borderColor: '#a0a0a0',
-  },
-  signInText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-  },
-  signUpText: {
-    fontSize: 17,
-    color: "#DC2626"
-  },
-  button1: {
-    width: 330,
-    height: 50,
-    borderColor: '#DC2626',
-    justifyContent: 'center',
-    marginTop: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: 'center',
-    backgroundColor: '#F0F2F5',
-  },
-  clientIcon: {
-    backgroundColor: '#FAAD14',
-    borderRadius: 20,
-    paddingHorizontal: 30,
-    paddingVertical: 40,
+  clientIconContainer: {
+    backgroundColor: '#f39c12',
+    borderRadius: 50,
+    padding: 15,
     marginRight: 15,
   },
+  clientInfo: {
+    flex: 1,
+  },
   clientName: {
-    fontSize: 29,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#2c3e50',
   },
   clientPhone: {
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  clientAmount: {
-    fontSize: 20,
-    
+    fontSize: 14,
+    color: '#7f8c8d',
     marginTop: 5,
   },
-  label: {
-    fontSize: 20,
+  clientAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#27ae60',
+    marginTop: 10,
+  },
+  formContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  formLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2c3e50',
     marginBottom: 10,
   },
-  passwordContainer: {
-    flexDirection: 'row',
+  input: {
+    borderWidth: 1,
+    borderColor: '#dcdde1',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  addButton: {
+    backgroundColor: '#f39c12',
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    width: '100%',
-    height: 50,
-    borderRadius: 10,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-    paddingHorizontal: 1,
+    marginBottom: 10,
   },
-  inputt: {
-    width: '90%',
-    height: 45,
-    borderRadius: 10,
+  buttonText: {
+    color: '#fff',
     fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
+    fontWeight: 'bold',
   },
-  inputContainer: {
-    width: '100%',
-    height: 50,
-    borderRadius: 10,
+  cancelButton: {
+    backgroundColor: '#ecf0f1',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#e74c3c',
     fontSize: 18,
-    paddingLeft: 15,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#a0a0a0',
-  },
-  dropdown: {
-    width: '100%',
-    height: 50,
-    justifyContent: 'center',
-  },
-  dropdownText: {
-    fontSize: 18,
-    color: '#000',
-  },
-  dropdownMenu: {
-    width: '100%',
-    borderRadius: 10,
-  },
-  buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignContent: 'center',
-    marginVertical: 20,
-    marginTop: 240,
+    fontWeight: 'bold',
   },
 });
+
+export default AddFunds;

@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, SafeAreaView, Text, View, ImageBackground, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LineChart } from 'react-native-chart-kit';
-import Svg, { Rect, Text as SvgText, Line,G } from 'react-native-svg';
+import Svg, { Rect, Text as SvgText, Line, G } from 'react-native-svg';
+
 const Home = () => {
   const screenWidth = Dimensions.get('window').width;
   const [existingUsersCount, setExistingUsersCount] = useState(0);
   const [totalAmountSold, setTotalAmountSold] = useState(0);
   const [totalVolumeSold, setTotalVolumeSold] = useState(0);
+  const [stockRecords, setStockRecords] = useState(0);
   const [agentId, setAgentId] = useState(null);
   const [monthlySalesData, setMonthlySalesData] = useState([]);
 
@@ -31,6 +32,7 @@ const Home = () => {
       fetchExistingClients();
       fetchTotalAmountSold();
       fetchMonthlySales();
+      fetchStockRecords();
     }
   }, [agentId]);
 
@@ -72,7 +74,7 @@ const Home = () => {
       const data = await response.json();
       if (data.statuscode === '00') {
         setTotalAmountSold(data.data.total_amount_sold);
-        setTotalVolumeSold(data.data.total_volume_sold);
+        setTotalVolumeSold(data.data.total_volume_sold.toFixed(2)); // Ensure two decimal places
       } else {
         console.error('Failed to fetch total amount sold:', data.message);
       }
@@ -104,27 +106,50 @@ const Home = () => {
     }
   };
 
+  const fetchStockRecords = async () => {
+    try {
+      const response = await fetch('https://gcnm.wigal.com.gh/fetchStocks', {
+        method: 'POST',
+        headers: {
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+        },
+        body: JSON.stringify({
+          agent_id: agentId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.statuscode === '00') {
+        setStockRecords(data.data[0].total_dispenser_qunatity);
+      } else {
+        console.error('Failed to fetch stock records:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching stock records:', error);
+    }
+  };
+
   const backgrounds = [
     {
-      img: require('../../assets/dashback1.png'),       
+      img: require('../../assets/dashback1.png'),
       icontext: "Fuel Sold",
       value: totalVolumeSold,
       unit: "Litres"
     },
     {
-      img: require('../../assets/dashback2.png'), 
+      img: require('../../assets/dashback2.png'),
       icontext: "Stock Records",
-      value: 123456789,
+      value: stockRecords,
       unit: "Litres"
     },
     {
-      img: require('../../assets/dashback4.png'), 
+      img: require('../../assets/dashback4.png'),
       icontext: "Existing Users",
       value: existingUsersCount,
       unit: "Users"
     },
     {
-      img: require('../../assets/dashback5.png'), 
+      img: require('../../assets/dashback5.png'),
       icontext: "Total Amount \nSold",
       value: totalAmountSold,
       unit: "GHS"
@@ -218,6 +243,7 @@ const Home = () => {
       </Svg>
     );
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>

@@ -5,6 +5,8 @@ import Home from '../screens/App/Home';
 import Record from '../screens/App/Records';
 import Supply from '../screens/App/Supply';
 import Customers from '../screens/App/Customer';
+import StockProductList from '../screens/App/StockProductList';
+import RecordList from '../screens/App/RecordList';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import ProductSupply from '../screens/App/Productsupply';
@@ -99,10 +101,10 @@ const AppTabs = () => {
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
             label = 'Home';
-          } else if (route.name === 'Record') {
+          } else if (route.name === 'RecordList') {
             iconName = focused ? 'document-text' : 'document-text-outline';
             label = 'Records';
-          } else if (route.name === 'Supply') {
+          } else if (route.name === 'StockProductList') {
             iconName = focused ? 'cube' : 'cube-outline';
             label = 'Supply';
           } else if (route.name === 'Customers') {
@@ -172,9 +174,9 @@ const AppTabs = () => {
         }}
       />
     
-      <Tab.Screen name="Supply" component={ProductSupply} />
+      <Tab.Screen name="StockProductList" component={StockProductList} />
 
-      <Tab.Screen name="Record" component={StockRecords} />
+      <Tab.Screen name="RecordList" component={RecordList} />
      
       <Tab.Screen name="Customers" component={Customers} options={{ headerShown: false }} />
       

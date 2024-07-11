@@ -12,11 +12,12 @@ import {
   ScrollView,
   Alert,
   Keyboard,
+  Modal,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ApplicationProvider, Layout, Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import axios from 'axios';
 
 const DispenseFuel = () => {
@@ -40,6 +41,7 @@ const DispenseFuel = () => {
   const [inputType, setInputType] = useState('');
 
   const scrollViewRef = useRef(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchAgentId = async () => {
@@ -173,20 +175,25 @@ const DispenseFuel = () => {
     }
   };
 
-  const InputField = ({ label, value, onChangeText, placeholder, editable = true, keyboardType = 'default' }) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={[styles.input, !editable && styles.readOnlyInput]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        editable={editable}
-        keyboardType={keyboardType}
-        placeholderTextColor="#a0a0a0"
-        blurOnSubmit={false}
-      />
-    </View>
+  const openModal = () => {
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  const selectProductType = (product) => {
+    setProductType(product.product_name);
+    setPricePerLitre(product.price);
+    setProductId(product.id);
+    closeModal();
+  };
+
+  const renderProductItem = ({ item }) => (
+    <TouchableOpacity style={styles.item} onPress={() => selectProductType(item)}>
+      <Text>{item.product_name}</Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -217,49 +224,71 @@ const DispenseFuel = () => {
 
           <View style={styles.formContainer}>
             <Text style={styles.formLabel}>Select Product Type</Text>
-            <Select
-              selectedIndex={new IndexPath(0)}
-              onSelect={(index) => {
-                setProductType(products[index.row].product_name);
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-              }}
-              value={productType || 'Select your product type'}
-              style={styles.select}
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={openModal}
             >
-              {products.map((product, index) => (
-                <SelectItem key={index} title={product.product_name} />
-              ))}
-            </Select>
+              <Text style={styles.dropdownButtonText}>
+                {productType || 'Select your product type'}
+              </Text>
+              <Icon name={modalVisible ? 'arrow-drop-up' : 'arrow-drop-down'} size={24} color="#007B5D" />
+            </TouchableOpacity>
+            <Modal visible={modalVisible} transparent animationType="none">
+              <TouchableOpacity
+                style={styles.overlay}
+                onPress={closeModal}
+              >
+                <View style={styles.dropdown}>
+                  <FlatList
+                    data={products}
+                    renderItem={renderProductItem}
+                    keyExtractor={(item) => item.id.toString()}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Modal>
 
-            <InputField
-              label="Price Per Litre"
-              value={pricePerLitre}
-              editable={false}
-              placeholder="Price per litre"
-              keyboardType="numeric"
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Price Per Litre</Text>
+              <TextInput
+                style={[styles.input, styles.readOnlyInput]}
+                value={pricePerLitre}
+                editable={false}
+                keyboardType="numeric"
+              />
+            </View>
 
-            <InputField
-              label="Quantity (Litres)"
-              value={quantity}
-              onChangeText={(text) => {
-                setInputType('quantity');
-                setQuantity(text);
-              }}
-              placeholder="Enter quantity"
-              keyboardType="numeric"
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Quantity (Litres)</Text>
+              <TextInput
+                style={styles.input}
+                value={quantity}
+                onChangeText={(text) => {
+                  setInputType('quantity');
+                  setQuantity(text);
+                }}
+                placeholder="Enter quantity"
+                keyboardType="numeric"
+                placeholderTextColor="#a0a0a0"
+                blurOnSubmit={false}
+              />
+            </View>
 
-            <InputField
-              label="Amount (GHS)"
-              value={amount}
-              onChangeText={(text) => {
-                setInputType('amount');
-                setAmount(text);
-              }}
-              placeholder="Amount"
-              keyboardType="numeric"
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Amount (GHS)</Text>
+              <TextInput
+                style={styles.input}
+                value={amount}
+                onChangeText={(text) => {
+                  setInputType('amount');
+                  setAmount(text);
+                }}
+                placeholder="Amount"
+                keyboardType="numeric"
+                placeholderTextColor="#a0a0a0"
+                blurOnSubmit={false}
+              />
+            </View>
 
             <TouchableOpacity 
               style={styles.button} 
@@ -274,8 +303,6 @@ const DispenseFuel = () => {
     </SafeAreaView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -346,8 +373,38 @@ const styles = StyleSheet.create({
     color: '#2c3e50',
     marginBottom: 10,
   },
-  select: {
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#dcdde1',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     marginBottom: 20,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#2c3e50',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdown: {
+    backgroundColor: '#fff',
+    width: '80%',
+    borderRadius: 8,
+    padding: 10,
+    maxHeight: '50%',
+  },
+  item: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dcdde1',
   },
   inputContainer: {
     marginBottom: 20,

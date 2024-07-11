@@ -29,7 +29,7 @@ const Intro = () => {
       
     },
     {
-      img: require('../../assets/slider3.png'), // update the path to your second image
+      img: require('./slider5.png'), // update the path to your second image
       text1: 'Maximize Efficiency with \t Fuel Management App',
       text2: 'Welcome to the future of fuel', 
       text3: 'management! Get ready to',
@@ -156,8 +156,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     borderRadius: 10,
-    marginRight: 20,
+
     alignItems: 'center',
+    alignContent:"center"
   },
   button1: {
     width: 300,

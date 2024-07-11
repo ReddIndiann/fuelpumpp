@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   clientIconContainer: {
-    backgroundColor: '#f39c12',
+    backgroundColor: '#2ecc71',
     borderRadius: 50,
     padding: 15,
     marginRight: 15,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   addButton: {
-    backgroundColor: '#f39c12',
+    backgroundColor: '#2ecc71',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',

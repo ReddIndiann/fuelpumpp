@@ -6,40 +6,86 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Alert,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
-import { Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const Dropdown = ({ label, data, onSelect }) => {
+  const [visible, setVisible] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const toggleDropdown = () => {
+    setVisible(!visible);
+  };
+
+  const onItemPress = (item) => {
+    setSelected(item);
+    onSelect(item);
+    setVisible(false);
+  };
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={styles.item} onPress={() => onItemPress(item)}>
+      <Text>{item.product_name}</Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.dropdownContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
+        <Text style={styles.dropdownButtonText}>
+          {(selected && selected.product_name) || "Select your product type"}
+        </Text>
+        <Icon name={visible ? "arrow-drop-up" : "arrow-drop-down"} size={24} color="#007B5D" />
+      </TouchableOpacity>
+      <Modal visible={visible} transparent animationType="none">
+        <TouchableOpacity 
+          style={styles.overlay}
+          onPress={() => setVisible(false)}
+        >
+          <View style={styles.dropdown}>
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id.toString()}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+};
 
 const StockRecords = () => {
   const [vehicleArrivalDate, setVehicleArrivalDate] = useState(new Date());
   const [dippingTime, setDippingTime] = useState(new Date());
   const [showDippingTimePicker, setShowDippingTimePicker] = useState(false);
   const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
-  const [selectedProductType, setSelectedProductType] = useState(new IndexPath(0));
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [dippingQuantity, setDippingQuantity] = useState('');
   const [dispenserQuantity, setDispenserQuantity] = useState('');
   const [agentId, setAgentId] = useState(null);
   const [products, setProducts] = useState([]);
   const navigation = useNavigation();
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
 
   useEffect(() => {
     const fetchAgentId = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(savedUser);
-        setAgentId(user?.id); // Adjust this based on your user object structure
+        console.log('Fetched user:', user);
+        setAgentId(user?.id);
         if (user?.id) {
           fetchProducts(user.id);
         }
@@ -53,6 +99,7 @@ const StockRecords = () => {
 
   const fetchProducts = async (agentId) => {
     try {
+      console.log('Fetching products for agent ID:', agentId);
       const response = await fetch('https://gcnm.wigal.com.gh/clientproducts', {
         method: 'POST',
         headers: {
@@ -65,11 +112,8 @@ const StockRecords = () => {
 
       const data = await response.json();
       if (data.statuscode === '00') {
+        console.log('Fetched products:', data.data);
         setProducts(data.data);
-        // Log the fetched products' details
-        data.data.forEach(product => {
-          console.log(`Product ID: ${product.id}, Name: ${product.product_name}, Price: ${product.price}`);
-        });
       } else {
         console.error('Failed to fetch products:', data.message);
       }
@@ -89,18 +133,20 @@ const StockRecords = () => {
     const currentDate = selectedDate || vehicleArrivalDate;
     setShowVehicleArrivalDatePicker(false);
     setVehicleArrivalDate(currentDate);
-    console.log('Selected Vehicle Arrival Date:', formatDate(currentDate));
   };
 
   const handleDippingTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || dippingTime;
     setShowDippingTimePicker(false);
     setDippingTime(currentTime);
-    console.log('Selected Dipping Time:', currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  };
+
+  const handleProductSelect = (product) => {
+    setSelectedProduct(product);
+    setSelectedProductId(product.id);
   };
 
   const handleSubmit = () => {
-    // Validate all fields are filled
     if (!agentId || !selectedProductId || !dippingQuantity || !dispenserQuantity) {
       Alert.alert('Error', 'Please fill all form inputs before proceeding.');
       return;
@@ -132,173 +178,191 @@ const StockRecords = () => {
       Alert.alert('Error', 'Failed to save stock record');
     });
   };
-  
-console.log(selectedProductId)
-return (
-  <SafeAreaView style={styles.container}>
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Stock Records</Text>
-        
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Select Product Type</Text>
-          <Select
-            style={styles.select}
-            selectedIndex={selectedProductType}
-            onSelect={index => {
-              setSelectedProductType(index);
-              const selectedProduct = products[index.row];
-              setSelectedProductId(selectedProduct.id);
-            }}
-            value={products[selectedProductType.row]?.product_name || 'Select your product type'}
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <Text style={styles.title}>Stock Records</Text>
+          
+          <Dropdown
+            label="Select Product Type"
+            data={products}
+            onSelect={handleProductSelect}
+          />
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Date of Record</Text>
+            <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
+              <Text style={styles.datePickerText}>
+                {vehicleArrivalDate.toLocaleDateString()}
+              </Text>
+              <Icon name="calendar-today" size={24} color="#007B5D" />
+            </TouchableOpacity>
+          </View>
+          {showVehicleArrivalDatePicker && (
+            <DateTimePicker
+              value={vehicleArrivalDate}
+              mode="date"
+              display="default"
+              minimumDate={new Date()}
+              onChange={handleVehicleArrivalDateChange}
+            />
+          )}
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Time of Dipping</Text>
+            <TouchableOpacity onPress={() => setShowDippingTimePicker(true)} style={styles.datePickerButton}>
+              <Text style={styles.datePickerText}>
+                {dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+              <Icon name="access-time" size={24} color="#007B5D" />
+            </TouchableOpacity>
+          </View>
+          {showDippingTimePicker && (
+            <DateTimePicker
+              value={dippingTime}
+              mode="time"
+              display="default"
+              onChange={handleDippingTimeChange}
+            />
+          )}
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Dipping Quantity</Text>
+            <TextInput
+              placeholder="Enter quantity"
+              value={dippingQuantity}
+              onChangeText={(text) => setDippingQuantity(text)}
+              style={styles.input}
+              keyboardType='numeric'
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Dispenser Quantity</Text>
+            <TextInput
+              placeholder="Enter quantity"
+              value={dispenserQuantity}
+              onChangeText={(text) => setDispenserQuantity(text)}
+              style={styles.input}
+              keyboardType='numeric'
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSubmit}
           >
-            {products.map((product, index) => (
-              <SelectItem key={index} title={product.product_name} />
-            ))}
-          </Select>
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Date of Record</Text>
-          <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
-            <Text style={styles.datePickerText}>
-              {vehicleArrivalDate.toLocaleDateString()}
-            </Text>
-            <Icon name="calendar-today" size={24} color="#007B5D" />
+            <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
-        </View>
-        {showVehicleArrivalDatePicker && (
-          <DateTimePicker
-            value={vehicleArrivalDate}
-            mode="date"
-            display="default"
-            minimumDate={new Date()}
-            onChange={handleVehicleArrivalDateChange}
-          />
-        )}
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Time of Dipping</Text>
-          <TouchableOpacity onPress={() => setShowDippingTimePicker(true)} style={styles.datePickerButton}>
-            <Text style={styles.datePickerText}>
-              {dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </Text>
-            <Icon name="access-time" size={24} color="#007B5D" />
-          </TouchableOpacity>
-        </View>
-        {showDippingTimePicker && (
-          <DateTimePicker
-            value={dippingTime}
-            mode="time"
-            display="default"
-            onChange={handleDippingTimeChange}
-          />
-        )}
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Dipping Quantity</Text>
-          <TextInput
-            placeholder="Enter quantity"
-            value={dippingQuantity}
-            onChangeText={(text) => setDippingQuantity(text)}
-            style={styles.input}
-            keyboardType='numeric'
-            placeholderTextColor="#a0a0a0"
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Dispenser Quantity</Text>
-          <TextInput
-            placeholder="Enter quantity"
-            value={dispenserQuantity}
-            onChangeText={(text) => setDispenserQuantity(text)}
-            style={styles.input}
-            keyboardType='numeric'
-            placeholderTextColor="#a0a0a0"
-          />
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSubmit}
-        >
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
-);
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-container: {
-  flex: 1,
-  backgroundColor: '#f5f5f5',
-},
-scrollContainer: {
-  flexGrow: 1,
-  padding: 20,
-},
-title: {
-  fontSize: 28,
-  fontWeight: 'bold',
-  color: '#007B5D',
-  marginBottom: 20,
-},
-formGroup: {
-  marginBottom: 20,
-},
-label: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#333',
-  marginBottom: 8,
-},
-select: {
-  backgroundColor: '#fff',
-  borderRadius: 8,
-  borderColor: '#ddd',
-},
-datePickerButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  backgroundColor: '#fff',
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: '#ddd',
-  paddingHorizontal: 12,
-  paddingVertical: 12,
-},
-datePickerText: {
-  fontSize: 16,
-  color: '#333',
-},
-input: {
-  backgroundColor: '#fff',
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: '#ddd',
-  paddingHorizontal: 12,
-  paddingVertical: 12,
-  fontSize: 16,
-},
-button: {
-  backgroundColor: '#007B5D',
-  borderRadius: 8,
-  paddingVertical: 14,
-  alignItems: 'center',
-  marginTop: 20,
-},
-buttonText: {
-  color: '#fff',
-  fontSize: 18,
-  fontWeight: '600',
-},
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#007B5D',
+    marginBottom: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  datePickerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: '#007B5D',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  dropdownContainer: {
+    marginBottom: 20,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  dropdown: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    width: '80%',
+    maxHeight: 300,
+  },
+  item: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
 });
 
 export default StockRecords;

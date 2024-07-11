@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   clientIconContainer: {
-    backgroundColor: '#2ecc71',
+    backgroundColor: '#e74c3c',
     borderRadius: 50,
     padding: 15,
     marginRight: 15,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   withdrawButton: {
-    backgroundColor: '#2ecc71',
+    backgroundColor: '#e74c3c',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',

@@ -24,23 +24,7 @@ const ExistingClientTransaction = () => {
   const [balance, setBalance] = useState('0');
   const [fadeAnim] = useState(new Animated.Value(0));
 
-  const handleCloseAccount = () => {
-    Alert.alert(
-      'Confirm Account Closure',
-      'Are you sure you want to close this account?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Yes',
-          onPress: () => closeAccount(),
-        },
-      ],
-      { cancelable: false }
-    );
-  };
+  const isAccountOpen = client.account_status === "open";
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -82,7 +66,25 @@ const ExistingClientTransaction = () => {
 
     fetchAgentId();
     fetchBalance();
-  }, [client.customerId]);
+  }, [client.phonenumber]);
+
+  const handleCloseAccount = () => {
+    Alert.alert(
+      'Confirm Account Closure',
+      'Are you sure you want to close this account?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => closeAccount(),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const closeAccount = async () => {
     try {
@@ -90,7 +92,7 @@ const ExistingClientTransaction = () => {
         'https://gcnm.wigal.com.gh/closingingaccount',
         {
           agent_id: agentId,
-          customer_id: client.customerId,
+          customer_id: client.clientid,
         },
         {
           headers: {
@@ -109,10 +111,18 @@ const ExistingClientTransaction = () => {
     }
   };
 
-  const ActionButton = ({ icon, text, color, onPress }) => (
-    <TouchableOpacity style={[styles.actionButton, { backgroundColor: color }]} onPress={onPress}>
-      <Icon name={icon} size={28} color="#fff" />
-      <Text style={styles.actionButtonText}>{text}</Text>
+  const ActionButton = ({ icon, text, color, onPress, disabled }) => (
+    <TouchableOpacity 
+      style={[
+        styles.actionButton, 
+        { backgroundColor: color },
+        disabled && styles.disabledButton
+      ]} 
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <Icon name={icon} size={28} color={disabled ? "#ccc" : "#fff"} />
+      <Text style={[styles.actionButtonText, disabled && styles.disabledText]}>{text}</Text>
     </TouchableOpacity>
   );
 
@@ -134,6 +144,9 @@ const ExistingClientTransaction = () => {
                 <Text style={styles.clientName}>{client.name}</Text>
                 <Text style={styles.clientPhone}>{client.phonenumber}</Text>
                 <Text style={styles.clientAmount}>GH₵ {balance}</Text>
+                <Text style={styles.accountStatus}>
+                  Status: {client.account_status}
+                </Text>
               </View>
             </View>
           </Animated.View>
@@ -144,24 +157,28 @@ const ExistingClientTransaction = () => {
               text="Dispense Fuel"
               color="#3498db"
               onPress={() => navigation.navigate('dispensefuel', { client })}
+              disabled={!isAccountOpen}
             />
             <ActionButton
               icon="attach-money"
               text="Add Funds"
               color="#2ecc71"
               onPress={() => navigation.navigate('addfunds', { client })}
+              disabled={!isAccountOpen}
             />
             <ActionButton
               icon="remove-circle"
               text="Withdraw Funds"
               color="#e74c3c"
               onPress={() => navigation.navigate('withdrawfund', { client })}
+              disabled={!isAccountOpen}
             />
             <ActionButton
               icon="close"
               text="Close Account"
               color="#95a5a6"
               onPress={handleCloseAccount}
+              disabled={!isAccountOpen}
             />
           </View>
         </ScrollView>
@@ -225,6 +242,11 @@ const styles = StyleSheet.create({
     color: '#27ae60',
     marginTop: 10,
   },
+  accountStatus: {
+    fontSize: 16,
+    color: '#7f8c8d',
+    marginTop: 5,
+  },
   actionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -243,6 +265,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
     fontWeight: '600',
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    color: '#ccc',
   },
 });
 

@@ -15,22 +15,24 @@ import Clients from '../screens/App/AddCustomers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import AuthContext from '../hooks/useAuthContext';
+
 const Tab = createBottomTabNavigator();
 
 const AppTabs = () => {
-  const { logout } = useContext(AuthContext); // Assuming AuthContext provides logout functionality
+  const { logout } = useContext(AuthContext);
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
+  const [location, setLocation] = useState('');
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
-    // Fetch user information from AsyncStorage or context
     const fetchUserData = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('user');
         if (savedUser) {
           const user = JSON.parse(savedUser);
-          setUserName(user.Name); // Assuming user object has a 'name' property
+          setUserName(user.Name);
+          setLocation(user.location);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -41,7 +43,6 @@ const AppTabs = () => {
   }, []);
 
   useEffect(() => {
-    // Update greeting based on current time
     const getCurrentGreeting = () => {
       const currentHour = new Date().getHours();
       if (currentHour < 12) {
@@ -132,54 +133,66 @@ const AppTabs = () => {
         },
       })}
     >
-     <Tab.Screen 
-  name="Home" 
-  component={Home}
-  options={{
-    headerTransparent: false,
-    headerLeft: () => (
-      <View style={{ marginLeft: 10 }}>
-        <TouchableOpacity onPress={() => navigation.navigate('profile')} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 30, justifyContent: "center", alignItems: "center" }}>
-          <Ionicons name="person-outline" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-    ),
-    headerTitle: () => (
-      <View style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: 'center', justifyContent: "center" }}>
-        <Text style={{ color: "black", fontSize: 15 }}>
-          {greeting}!
-        </Text>
-        <Text style={{ fontSize: 20 }}>
-          {userName}
-        </Text>
-      </View>
-    ),
-    headerRight: () => (
-      <TouchableOpacity onPress={navToNotification} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 7, justifyContent: "center", alignItems: "center" }}>
-        <Ionicons name="log-out-outline" size={24} color="black" />
-      </TouchableOpacity>
-    ),
-    headerTitleAlign: 'center',
-    headerStyle: {
-      backgroundColor: '#E0E0E0', // Darker shade of white
-      height: 100,
-    },
-    headerTitleStyle: {
-      fontSize: 15,
-      color: '#333',
-    },
-    headerRightContainerStyle: {
-      marginLeft: "2%"
-    }
-  }}
-/>
-
-    
+      <Tab.Screen 
+        name="Home" 
+        component={Home}
+        options={{
+          headerTransparent: false,
+          headerLeft: () => (
+            <View style={{ marginLeft: 10 }}>
+              <TouchableOpacity onPress={() => navigation.navigate('profile')} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 30, justifyContent: "center", alignItems: "center" }}>
+                <Ionicons name="person-outline" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+          ),
+          headerTitle: () => (
+            <View style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: 'center', justifyContent: "center" }}>
+              <Text style={{ color: "black", fontSize: 15 }}>
+                {greeting}!
+              </Text>
+              <Text style={{ fontSize: 20 }}>
+                {userName}
+              </Text>
+              <Text style={{ fontSize: 16 }}>
+              {location}
+              </Text>
+            </View>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={navToNotification} style={{ marginRight: 20, backgroundColor: "#F5F5F5", width: 50, height: 50, borderRadius: 7, justifyContent: "center", alignItems: "center" }}>
+              <Ionicons name="log-out-outline" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#E0E0E0',
+            height: 100,
+          },
+          headerTitleStyle: {
+            fontSize: 15,
+            color: '#333',
+          },
+          headerRightContainerStyle: {
+            marginLeft: "2%"
+          }
+        }}
+      />
+      
       <Tab.Screen name="StockProductList" component={StockProductList} />
 
       <Tab.Screen name="RecordList" component={RecordList} />
      
-      <Tab.Screen name="Customers" component={Customers} options={{ headerShown: false }} />
+      <Tab.Screen 
+        name="Customers" 
+        component={Customers} 
+        options={{ headerShown: false }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            e.preventDefault();
+            navigation.navigate('Customers');
+          },
+        })}
+      />
       
     </Tab.Navigator>
   );

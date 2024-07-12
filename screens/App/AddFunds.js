@@ -76,9 +76,10 @@ const AddFunds = ({ route, navigation }) => {
       }
     })
       .then(response => {
-        Alert.alert('Success', 'Funds added successfully.', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+        Alert.alert("Success", "A prompt has been sent to the customer's phone to complete the payment", [
+          { text: "OK", onPress: () => navigation.goBack() }
         ]);
+        
       })
       .catch(error => {
         Alert.alert('Error', 'Failed to add funds.');

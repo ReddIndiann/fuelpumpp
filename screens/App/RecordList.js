@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -8,44 +8,40 @@ import {
   FlatList,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import RecordDetailsModal from './RecordDetailsModal ';
+import { useFocusEffect } from '@react-navigation/native';
 
 const RecordList = ({ navigation }) => {
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
-  const [startDate, setStartDate] = useState(moment().subtract(1, 'days').toDate());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
+  const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAgentId = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        const user = JSON.parse(savedUser);
-        setAgentId(user?.id);
-      } catch (error) {
-        console.error('Failed to fetch agent ID:', error);
-      }
-    };
-
-    fetchAgentId();
+  const fetchAgentId = useCallback(async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(savedUser);
+      setAgentId(user?.id);
+    } catch (error) {
+      console.error('Failed to fetch agent ID:', error);
+    }
   }, []);
 
-  useEffect(() => {
-    if (agentId) {
-      fetchData();
-    }
-  }, [agentId, startDate, endDate]);
+  const fetchData = useCallback(async () => {
+    if (!agentId) return;
 
-  const fetchData = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch('https://gcnm.wigal.com.gh/fetchStocklist', {
         method: 'POST',
@@ -55,8 +51,8 @@ const RecordList = ({ navigation }) => {
         },
         body: JSON.stringify({
           agent_id: agentId,
-          start_date: moment(startDate).format('YYYY-MM-DD'),
-          end_date: moment(endDate).format('YYYY-MM-DD'),
+          start_date: startDate,
+          end_date: endDate,
         }),
       });
 
@@ -65,13 +61,21 @@ const RecordList = ({ navigation }) => {
       if (responseData.statuscode === '00') {
         setProductData(responseData.data);
       } else {
-        Alert.alert('Error', responseData.message);
+        Alert.alert('Load Unsuccesful', responseData.message);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
       Alert.alert('Error', 'Failed to fetch product data');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [agentId, startDate, endDate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchAgentId().then(() => fetchData());
+    }, [fetchAgentId, fetchData])
+  );
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -98,15 +102,23 @@ const RecordList = ({ navigation }) => {
   );
 
   const handleDateChange = (event, selectedDate, isStartDate) => {
-    const currentDate = selectedDate || (isStartDate ? startDate : endDate);
+    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
     if (isStartDate) {
       setShowStartDatePicker(Platform.OS === 'ios');
-      setStartDate(currentDate);
+      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
     } else {
       setShowEndDatePicker(Platform.OS === 'ios');
-      setEndDate(currentDate);
+      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007B5D" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -124,13 +136,14 @@ const RecordList = ({ navigation }) => {
           style={styles.datePickerButton}
           onPress={() => setShowStartDatePicker(true)}
         >
-          <Text>{moment(startDate).format('YYYY-MM-DD')}</Text>
+          <Text style={styles.dateText}>{moment(startDate).format('MMM DD, YYYY')}</Text>
         </TouchableOpacity>
+        <Text style={styles.dateRangeText}>to</Text>
         <TouchableOpacity
           style={styles.datePickerButton}
           onPress={() => setShowEndDatePicker(true)}
         >
-          <Text>{moment(endDate).format('YYYY-MM-DD')}</Text>
+          <Text style={styles.dateText}>{moment(endDate).format('MMM DD, YYYY')}</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -141,7 +154,7 @@ const RecordList = ({ navigation }) => {
       />
       {showStartDatePicker && (
         <DateTimePicker
-          value={startDate}
+          value={new Date(startDate)}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => handleDateChange(event, selectedDate, true)}
@@ -149,7 +162,7 @@ const RecordList = ({ navigation }) => {
       )}
       {showEndDatePicker && (
         <DateTimePicker
-          value={endDate}
+          value={new Date(endDate)}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => handleDateChange(event, selectedDate, false)}
@@ -190,6 +203,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  datePickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 15,
+    paddingHorizontal: 20,
+  },
+  datePickerButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  dateRangeText: {
+    fontSize: 16,
+    color: '#666',
+    marginHorizontal: 10,
+    fontWeight: '500',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -229,16 +268,11 @@ const styles = StyleSheet.create({
   flatListContent: {
     padding: 15,
   },
-  datePickerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  datePickerButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 5,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
 });
 

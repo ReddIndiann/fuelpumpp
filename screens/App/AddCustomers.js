@@ -12,14 +12,60 @@ import {
   Keyboard,
   ScrollView,
   Modal,
-  Alert
+  Alert,
+  FlatList,
 } from 'react-native';
-import { Select, SelectItem } from '@ui-kitten/components';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import ModalDropdown from 'react-native-modal-dropdown';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+
+const Dropdown = ({ label, data, onSelect }) => {
+  const [visible, setVisible] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const toggleDropdown = () => {
+    setVisible(!visible);
+  };
+
+  const onItemPress = (item) => {
+    setSelected(item);
+    onSelect(item);
+    setVisible(false);
+  };
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={styles.item} onPress={() => onItemPress(item)}>
+      <Text>{item.label}</Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.dropdownContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
+        <Text style={styles.dropdownButtonText}>
+          {(selected && selected.label) || "Select your ID card type"}
+        </Text>
+        <Icon name={visible ? "arrow-drop-up" : "arrow-drop-down"} size={24} color="#007B5D" />
+      </TouchableOpacity>
+      <Modal visible={visible} transparent animationType="none">
+        <TouchableOpacity 
+          style={styles.overlay}
+          onPress={() => setVisible(false)}
+        >
+          <View style={styles.dropdown}>
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.value}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+};
 
 const AddCustomers = () => {
   const [name, setName] = useState('');
@@ -71,7 +117,7 @@ const AddCustomers = () => {
         email,
         phonenumber: phoneNumber,
         alternative_phonenumber: alternativePhoneNumber,
-        id_card_type: idCardType,
+        id_card_type: idCardType.value,
         agent_id: userId,
         id_card_number: idCardNumber,
         wallet_number: walletNumber
@@ -91,6 +137,13 @@ const AddCustomers = () => {
       setIsModalVisible(true);
     }
   };
+
+  const idCardTypes = [
+    { label: 'Ghana Card', value: 'ghana_card' },
+    { label: 'ID Card Type 2', value: 'id_card_type_2' },
+    { label: 'ID Card Type 3', value: 'id_card_type_3' },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -147,19 +200,11 @@ const AddCustomers = () => {
             />
           </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>ID Card Type</Text>
-            <Select
-              style={styles.select}
-              selectedIndex={idCardType}
-              onSelect={(index) => setIdCardType(index)}
-              value={idCardType || 'Select your ID card type'}
-            >
-              <SelectItem title="Ghana Card" />
-              <SelectItem title="ID Card Type 2" />
-              <SelectItem title="ID Card Type 3" />
-            </Select>
-          </View>
+          <Dropdown
+            label="ID Card Type"
+            data={idCardTypes}
+            onSelect={setIdCardType}
+          />
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>ID Card Number</Text>
@@ -264,6 +309,43 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  dropdownContainer: {
+    marginBottom: 20,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdown: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    maxHeight: 300,
+  },
+  item: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   modalOverlay: {
     flex: 1,

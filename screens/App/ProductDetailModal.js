@@ -4,6 +4,16 @@ import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'rea
 const ProductDetailsModal = ({ isVisible, onClose, item }) => {
   if (!item) return null;
 
+  const details = [
+    { label: 'Product', value: item.product_name },
+    { label: 'Location', value: item.location_name },
+    { label: 'Arrival Date', value: item.arrival_date },
+    { label: 'Delivered Quantity', value: item.delivered_quantity },
+    { label: 'Vehicle Number', value: item.vehicle_number },
+    { label: 'Driver Name', value: item.driver_name },
+    { label: 'Driver Number', value: item.driver_number },
+  ];
+
   return (
     <Modal
       animationType="slide"
@@ -14,22 +24,13 @@ const ProductDetailsModal = ({ isVisible, onClose, item }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <ScrollView contentContainerStyle={styles.scrollView}>
-            <Text style={styles.modalTitle}>{item.product_name}</Text>
-            {[
-              { label: 'ID', value: item.id },
-              { label: 'Client ID', value: item.client_id },
-              { label: 'Location ID', value: item.location_id },
-              { label: 'Arrival Date', value: item.arrival_date },
-              { label: 'Delivered Quantity', value: item.delivered_quantity },
-              { label: 'Vehicle Number', value: item.vehicle_number },
-              { label: 'Driver Name', value: item.driver_name },
-              { label: 'Driver Number', value: item.driver_number },
-              { label: 'Date Created', value: item.date_created },
-            ].map((detail, index) => (
-              <View key={index} style={styles.detailItem}>
-                <Text style={styles.detailLabel}>{detail.label}:</Text>
-                <Text style={styles.detailValue}>{detail.value}</Text>
-              </View>
+            {details.map((detail, index) => (
+              detail.value ? (
+                <View key={index} style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>{detail.label}:</Text>
+                  <Text style={styles.detailValue}>{detail.value}</Text>
+                </View>
+              ) : null
             ))}
           </ScrollView>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>

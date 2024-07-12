@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,31 +19,84 @@ const Profile = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [location, setLocation] = useState('');
+  const [client, setClient] = useState('');
+  const [verifyPassword, setVerifyPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [verifyPasswordVisible, setVerifyPasswordVisible] = useState(false);
+
+  const [formFullName, setFormFullName] = useState('');
+  const [formPhoneNumber, setFormPhoneNumber] = useState('');
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        if (savedUser) {
-          const user = JSON.parse(savedUser);
-          setUserData(user);
-          setFullName(user.Name || '');
-          setEmail(user.email || '');
-          // Phone number isn't in the provided data, so we'll keep it empty
-          setPhoneNumber('');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
     fetchUserData();
   }, []);
 
+  const fetchUserData = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        setUserData(user);
+        setFullName(user.Name || '');
+        setEmail(user.email || '');
+        setPhoneNumber(user.phoneNumber || '');
+
+        setFormFullName(user.Name || '');
+        setFormPhoneNumber(user.phoneNumber || '');
+        setLocation(user.location || '');
+        setClient(user.client || '');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      Alert.alert('Error', 'Failed to load user data');
+    }
+  };
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
+  };
+
+  const toggleVerifyPasswordVisibility = () => {
+    setVerifyPasswordVisible(!verifyPasswordVisible);
+  };
+
+  const updateUserDetails = async () => {
+    if (password !== verifyPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://gcnm.wigal.com.gh/updateUserDetails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+        },
+        body: JSON.stringify({
+          agent_id: userData.id,
+          name: formFullName,
+          phoneNumber: formPhoneNumber,
+          password: password,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedUser = { ...userData, Name: formFullName, phoneNumber: formPhoneNumber };
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        setUserData(updatedUser);
+        setFullName(formFullName);
+        setPhoneNumber(formPhoneNumber);
+        Alert.alert('Success', 'Profile updated successfully');
+      } else {
+        Alert.alert('Error', 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert('Error', 'An error occurred while updating profile');
+    }
   };
 
   return (
@@ -59,6 +113,8 @@ const Profile = () => {
               <Icon name="person" size={80} color="#0601B4" style={styles.profileIcon} />
             </View>
             <Text style={styles.profileName}>{fullName}</Text>
+            <Text style={styles.profileName}>{location}</Text>
+            <Text style={styles.profileName}>{client}</Text>
             <Text style={styles.profileEmail}>{email}</Text>
           </View>
 
@@ -66,8 +122,8 @@ const Profile = () => {
             <Text style={styles.label}>Full Name</Text>
             <TextInput
               style={styles.input}
-              value={fullName}
-              onChangeText={setFullName}
+              value={formFullName}
+              onChangeText={setFormFullName}
               placeholder="Enter your full name"
               placeholderTextColor="#a0a0a0"
             />
@@ -75,8 +131,8 @@ const Profile = () => {
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              value={formPhoneNumber}
+              onChangeText={setFormPhoneNumber}
               placeholder="Enter your phone number"
               placeholderTextColor="#a0a0a0"
               keyboardType="phone-pad"
@@ -90,16 +146,17 @@ const Profile = () => {
               placeholder="Enter your email address"
               placeholderTextColor="#a0a0a0"
               keyboardType="email-address"
+              editable={false}
             />
 
-            <Text style={styles.label}>Current Password</Text>
+            <Text style={styles.label}>New Password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry={!passwordVisible}
-                placeholder="Enter your current password"
+                placeholder="Enter your new password"
                 placeholderTextColor="#a0a0a0"
               />
               <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -107,8 +164,23 @@ const Profile = () => {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.editButton}>
-              <Text style={styles.editButtonText}>Edit Profile</Text>
+            <Text style={styles.label}>Verify New Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                value={verifyPassword}
+                onChangeText={setVerifyPassword}
+                secureTextEntry={!verifyPasswordVisible}
+                placeholder="Verify your new password"
+                placeholderTextColor="#a0a0a0"
+              />
+              <TouchableOpacity onPress={toggleVerifyPasswordVisibility}>
+                <Icon name={verifyPasswordVisible ? "visibility" : "visibility-off"} size={24} color="#a0a0a0" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.updateButton} onPress={updateUserDetails}>
+              <Text style={styles.updateButtonText}>Update Profile</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -189,14 +261,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
   },
-  editButton: {
+  updateButton: {
     backgroundColor: '#007B5D',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 20,
   },
-  editButtonText: {
+  updateButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',

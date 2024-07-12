@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -14,7 +14,7 @@ import {
   StatusBar,
 } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -26,42 +26,46 @@ const Customer = () => {
   const isTablet = width >= 768;
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        const user = JSON.parse(savedUser);
-        const userId = user?.id;
+  const fetchCustomers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(savedUser);
+      const userId = user?.id;
 
-        if (!userId) {
-          throw new Error('User ID not found');
-        }
-
-        const response = await axios.post(
-          'https://gcnm.wigal.com.gh/getCustomers',
-          {
-            agent_id: userId,
-          },
-          {
-            headers: {
-              'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
-            },
-          }
-        );
-        setClients(response.data.data || []);
-      } catch (error) {
-        console.error('Error fetching clients:', error);
-      } finally {
-        setLoading(false);
+      if (!userId) {
+        throw new Error('User ID not found');
       }
-    };
 
-    fetchCustomers();
+      const response = await axios.post(
+        'https://gcnm.wigal.com.gh/getCustomers',
+        {
+          agent_id: userId,
+        },
+        {
+          headers: {
+            'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
+          },
+        }
+      );
+      setClients(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCustomers();
+    }, [fetchCustomers])
+  );
 
   const handleSearch = (text) => {
     setSearchQuery(text);
   };
+
   const filteredClients = clients.filter((client) =>
     (client.name && client.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (client.phoneNumber && client.phoneNumber.includes(searchQuery))
@@ -80,10 +84,17 @@ const Customer = () => {
       <View style={styles.cardContent}>
         <Text style={styles.cardName}>{item.name || 'Unnamed Client'}</Text>
         <Text style={styles.cardPhone}>{item.phonenumber || 'No phone number'}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.cardStatusText}>Account Status: </Text>
+          <Text style={[styles.cardStatus, { color: item.account_status === 'open' ? 'green' : 'red' }]}>
+            {item.account_status}
+          </Text>
+        </View>
       </View>
       <Ionicons name="chevron-forward" size={24} color="#007B5D" />
     </TouchableOpacity>
   );
+  
 
   if (loading) {
     return (
@@ -123,6 +134,7 @@ const Customer = () => {
           style={styles.flatList}
           contentContainerStyle={styles.flatListContent}
         />
+        <View style={styles.hidenon}></View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -220,12 +232,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  cardStatus: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f4f3f3',
   },
+  cardStatusText: {
+    fontSize: 14,
+    color: '#333', // Normal text color
+  },
+  hidenon:{
+    height:"10%"
+  }
 });
 
 export default Customer;

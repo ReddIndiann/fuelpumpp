@@ -66,15 +66,15 @@ const Dropdown = ({ label, data, onSelect }) => {
   );
 };
 
-const StockRecords = () => {
-  const [vehicleArrivalDate, setVehicleArrivalDate] = useState(new Date());
-  const [dippingTime, setDippingTime] = useState(new Date());
-  const [showDippingTimePicker, setShowDippingTimePicker] = useState(false);
-  const [showVehicleArrivalDatePicker, setShowVehicleArrivalDatePicker] = useState(false);
+const ProductSupply = () => {
+  const [arrivalDate, setArrivalDate] = useState(new Date());
+  const [showArrivalDatePicker, setShowArrivalDatePicker] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const [dippingQuantity, setDippingQuantity] = useState('');
-  const [dispenserQuantity, setDispenserQuantity] = useState('');
+  const [deliveredQuantity, setDeliveredQuantity] = useState('');
+  const [vehicleNumber, setVehicleNumber] = useState('');
+  const [driverName, setDriverName] = useState('');
+  const [driverNumber, setDriverNumber] = useState('');
   const [agentId, setAgentId] = useState(null);
   const [products, setProducts] = useState([]);
   const navigation = useNavigation();
@@ -126,16 +126,10 @@ const StockRecords = () => {
     return `${year}-${month}-${day}`;
   };
 
-  const handleVehicleArrivalDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || vehicleArrivalDate;
-    setShowVehicleArrivalDatePicker(false);
-    setVehicleArrivalDate(currentDate);
-  };
-
-  const handleDippingTimeChange = (event, selectedTime) => {
-    const currentTime = selectedTime || dippingTime;
-    setShowDippingTimePicker(false);
-    setDippingTime(currentTime);
+  const handleArrivalDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || arrivalDate;
+    setShowArrivalDatePicker(false);
+    setArrivalDate(currentDate);
   };
 
   const handleProductSelect = (product) => {
@@ -144,35 +138,35 @@ const StockRecords = () => {
   };
 
   const handleSubmit = () => {
-    if (!agentId || !selectedProductId || !dippingQuantity || !dispenserQuantity) {
+    if (!agentId || !selectedProductId || !deliveredQuantity || !vehicleNumber || !driverName || !driverNumber) {
       Alert.alert('Error', 'Please fill all form inputs before proceeding.');
       return;
     }
   
     const payload = {
       agent_id: agentId,
-      location_id: "3",
       product_id: selectedProductId,
-      record_date: formatDate(vehicleArrivalDate),
-      dipping_time: dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      dipping_quantity: dippingQuantity,
-      dispenser_qunatity: dispenserQuantity,
+      arrival_date: formatDate(arrivalDate),
+      delivered_quantity: deliveredQuantity,
+      vehicle_number: vehicleNumber,
+      driver_name: driverName,
+      driver_number: driverNumber
     };
   
-    axios.post('https://gcnm.wigal.com.gh/stockrecords', payload, {
+    axios.post('https://gcnm.wigal.com.gh/productsupply', payload, {
       headers: {
         'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
       }
     })
     .then(response => {
       console.log(response.data);
-      Alert.alert('Success', 'Stock record saved successfully', [
-        { text: 'OK', onPress: () => navigation.navigate('RecordList') }
+      Alert.alert('Success', 'Product supply record saved successfully', [
+        { text: 'OK', onPress: () => navigation.navigate('StockProductList') }
       ]);
     })
     .catch(error => {
       console.error(error);
-      Alert.alert('Error', 'Failed to save stock record');
+      Alert.alert('Error', 'Failed to save product supply record');
     });
   };
 
@@ -183,7 +177,7 @@ const StockRecords = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Stock Records</Text>
+          <Text style={styles.title}>Product Supply</Text>
           
           <Dropdown
             label="Select Product Type"
@@ -192,48 +186,29 @@ const StockRecords = () => {
           />
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Date of Record</Text>
-            <TouchableOpacity onPress={() => setShowVehicleArrivalDatePicker(true)} style={styles.datePickerButton}>
+            <Text style={styles.label}>Arrival Date</Text>
+            <TouchableOpacity onPress={() => setShowArrivalDatePicker(true)} style={styles.datePickerButton}>
               <Text style={styles.datePickerText}>
-                {vehicleArrivalDate.toLocaleDateString()}
+                {arrivalDate.toLocaleDateString()}
               </Text>
               <Icon name="calendar-today" size={24} color="#007B5D" />
             </TouchableOpacity>
           </View>
-          {showVehicleArrivalDatePicker && (
+          {showArrivalDatePicker && (
             <DateTimePicker
-              value={vehicleArrivalDate}
+              value={arrivalDate}
               mode="date"
               display="default"
-              minimumDate={new Date()}
-              onChange={handleVehicleArrivalDateChange}
+              onChange={handleArrivalDateChange}
             />
           )}
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Time of Dipping</Text>
-            <TouchableOpacity onPress={() => setShowDippingTimePicker(true)} style={styles.datePickerButton}>
-              <Text style={styles.datePickerText}>
-                {dippingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
-              <Icon name="access-time" size={24} color="#007B5D" />
-            </TouchableOpacity>
-          </View>
-          {showDippingTimePicker && (
-            <DateTimePicker
-              value={dippingTime}
-              mode="time"
-              display="default"
-              onChange={handleDippingTimeChange}
-            />
-          )}
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Dipping Quantity</Text>
+            <Text style={styles.label}>Delivered Quantity</Text>
             <TextInput
               placeholder="Enter quantity"
-              value={dippingQuantity}
-              onChangeText={(text) => setDippingQuantity(text)}
+              value={deliveredQuantity}
+              onChangeText={setDeliveredQuantity}
               style={styles.input}
               keyboardType='numeric'
               placeholderTextColor="#a0a0a0"
@@ -241,13 +216,35 @@ const StockRecords = () => {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Dispenser Quantity</Text>
+            <Text style={styles.label}>Vehicle Number</Text>
             <TextInput
-              placeholder="Enter quantity"
-              value={dispenserQuantity}
-              onChangeText={(text) => setDispenserQuantity(text)}
+              placeholder="Enter vehicle number"
+              value={vehicleNumber}
+              onChangeText={setVehicleNumber}
               style={styles.input}
-              keyboardType='numeric'
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Driver Name</Text>
+            <TextInput
+              placeholder="Enter driver name"
+              value={driverName}
+              onChangeText={setDriverName}
+              style={styles.input}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Driver Number</Text>
+            <TextInput
+              placeholder="Enter driver number"
+              value={driverNumber}
+              onChangeText={setDriverNumber}
+              style={styles.input}
+              keyboardType='phone-pad'
               placeholderTextColor="#a0a0a0"
             />
           </View>
@@ -362,4 +359,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StockRecords;
+export default ProductSupply;

@@ -85,7 +85,7 @@ const WithdrawFunds = ({ route, navigation }) => {
         }
       });
 
-      Alert.alert('Success', 'Withdrawal successful.', [
+      Alert.alert('Success', 'withdrawal request has been initiated successfully', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {

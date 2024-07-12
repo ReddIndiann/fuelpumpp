@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -8,44 +8,40 @@ import {
   FlatList,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import ProductDetailsModal from './ProductDetailModal';
+import { useFocusEffect } from '@react-navigation/native';
 
 const StockProductList = ({ navigation }) => {
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
-  const [startDate, setStartDate] = useState(moment().subtract(1, 'days').format('YYYY-MM-DD'));
+  const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAgentId = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        const user = JSON.parse(savedUser);
-        setAgentId(user?.id);
-      } catch (error) {
-        console.error('Failed to fetch agent ID:', error);
-      }
-    };
-
-    fetchAgentId();
+  const fetchAgentId = useCallback(async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(savedUser);
+      setAgentId(user?.id);
+    } catch (error) {
+      console.error('Failed to fetch agent ID:', error);
+    }
   }, []);
 
-  useEffect(() => {
-    if (agentId) {
-      fetchData();
-    }
-  }, [agentId, startDate, endDate]);
+  const fetchData = useCallback(async () => {
+    if (!agentId) return;
 
-  const fetchData = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch('https://gcnm.wigal.com.gh/fetchProductsupplylist', {
         method: 'POST',
@@ -65,11 +61,30 @@ const StockProductList = ({ navigation }) => {
       if (responseData.statuscode === '00') {
         setProductData(responseData.data);
       } else {
-        Alert.alert('Error', responseData.message);
+        Alert.alert('Load Unsuccesful', responseData.message);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
       Alert.alert('Error', 'Failed to fetch product data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [agentId, startDate, endDate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchAgentId().then(() => fetchData());
+    }, [fetchAgentId, fetchData])
+  );
+
+  const handleDateChange = (event, selectedDate, isStartDate) => {
+    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
+    if (isStartDate) {
+      setShowStartDatePicker(Platform.OS === 'ios');
+      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
+    } else {
+      setShowEndDatePicker(Platform.OS === 'ios');
+      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
     }
   };
 
@@ -97,16 +112,13 @@ const StockProductList = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  const handleDateChange = (event, selectedDate, isStartDate) => {
-    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
-    if (isStartDate) {
-      setShowStartDatePicker(Platform.OS === 'ios');
-      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
-    } else {
-      setShowEndDatePicker(Platform.OS === 'ios');
-      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
-    }
-  };
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007B5D" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -124,13 +136,14 @@ const StockProductList = ({ navigation }) => {
           style={styles.datePickerButton}
           onPress={() => setShowStartDatePicker(true)}
         >
-          <Text>{startDate}</Text>
+          <Text style={styles.dateText}>{moment(startDate).format('MMM DD, YYYY')}</Text>
         </TouchableOpacity>
+        <Text style={styles.dateRangeText}>to</Text>
         <TouchableOpacity
           style={styles.datePickerButton}
           onPress={() => setShowEndDatePicker(true)}
         >
-          <Text>{endDate}</Text>
+          <Text style={styles.dateText}>{moment(endDate).format('MMM DD, YYYY')}</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -190,6 +203,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  datePickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 15,
+    paddingHorizontal: 20,
+  },
+  datePickerButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  dateRangeText: {
+    fontSize: 16,
+    color: '#666',
+    marginHorizontal: 10,
+    fontWeight: '500',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -232,16 +271,11 @@ const styles = StyleSheet.create({
   flatListContent: {
     padding: 15,
   },
-  datePickerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  datePickerButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 5,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
 });
 

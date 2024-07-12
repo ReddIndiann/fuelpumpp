@@ -14,10 +14,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-import RecordDetailsModal from './RecordDetailsModal ';
+import ProductDetailsModal from './ProductDetailModal';
+import DisbursementDetailModal from './DisbursementDetailModal';
 import { useFocusEffect } from '@react-navigation/native';
 
-const RecordList = ({ navigation }) => {
+const DisbursementList  = ({ navigation }) => {
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
   const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
@@ -43,7 +44,7 @@ const RecordList = ({ navigation }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('https://gcnm.wigal.com.gh/fetchStocklist', {
+      const response = await fetch('https://gcnm.wigal.com.gh/customerdisbursementlist', {
         method: 'POST',
         headers: {
           'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
@@ -51,6 +52,7 @@ const RecordList = ({ navigation }) => {
         },
         body: JSON.stringify({
           agent_id: agentId,
+          customer_id: "2",
           start_date: startDate,
           end_date: endDate,
         }),
@@ -63,8 +65,9 @@ const RecordList = ({ navigation }) => {
       } else {
         Alert.alert(
           'List Fetch Unsuccessful',
-          'No stock of the product has been recorded today. Please enter new stock record information, or search for previous records.'
+          'No stock of the product has been recorded today. Please enter new  product information, or search for previous records.'
         );
+        
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -80,6 +83,17 @@ const RecordList = ({ navigation }) => {
     }, [fetchAgentId, fetchData])
   );
 
+  const handleDateChange = (event, selectedDate, isStartDate) => {
+    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
+    if (isStartDate) {
+      setShowStartDatePicker(Platform.OS === 'ios');
+      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
+    } else {
+      setShowEndDatePicker(Platform.OS === 'ios');
+      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
+    }
+  };
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
@@ -92,28 +106,17 @@ const RecordList = ({ navigation }) => {
         <Text style={styles.productName}>{item.product_name}</Text>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Dipping Quantity:</Text>
-            <Text style={styles.detailValue}>{item.dipping_quantity}</Text>
+            <Text style={styles.detailLabel}>Supplied Quantity:</Text>
+            <Text style={styles.detailValue}>{item.delivered_quantity}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Record Date:</Text>
-            <Text style={styles.detailValue}>{item.record_date}</Text>
+            <Text style={styles.detailLabel}>Supplied Date:</Text>
+            <Text style={styles.detailValue}>{item.arrival_date}</Text>
           </View>
         </View>
       </View>
     </TouchableOpacity>
   );
-
-  const handleDateChange = (event, selectedDate, isStartDate) => {
-    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
-    if (isStartDate) {
-      setShowStartDatePicker(Platform.OS === 'ios');
-      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
-    } else {
-      setShowEndDatePicker(Platform.OS === 'ios');
-      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
-    }
-  };
 
   if (isLoading) {
     return (
@@ -126,10 +129,10 @@ const RecordList = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.label}>Record List</Text>
+        <Text style={styles.label}>Disbursement List</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => navigation.navigate('StockRecords')}
+          onPress={() => navigation.navigate('ProductSupply')}
         >
           <Icon name="add" size={24} color="#fff" />
         </TouchableOpacity>
@@ -171,7 +174,7 @@ const RecordList = ({ navigation }) => {
           onChange={(event, selectedDate) => handleDateChange(event, selectedDate, false)}
         />
       )}
-      <RecordDetailsModal
+      <DisbursementDetailModal
         isVisible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         item={selectedItem}
@@ -237,7 +240,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
     elevation: 4,
@@ -279,4 +285,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecordList;
+export default DisbursementList ;

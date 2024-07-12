@@ -156,7 +156,7 @@ const ExistingClientTransaction = () => {
               icon="local-gas-station"
               text="Dispense Fuel"
               color="#3498db"
-              onPress={() => navigation.navigate('dispensefuel', { client })}
+              onPress={() => navigation.navigate('DisburementList', { client })}
               disabled={!isAccountOpen}
             />
             <ActionButton

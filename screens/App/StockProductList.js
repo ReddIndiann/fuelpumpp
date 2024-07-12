@@ -61,7 +61,11 @@ const StockProductList = ({ navigation }) => {
       if (responseData.statuscode === '00') {
         setProductData(responseData.data);
       } else {
-        Alert.alert('Load Unsuccesful', responseData.message);
+        Alert.alert(
+          'List Fetch Unsuccessful',
+          'No stock of the product has been recorded today. Please enter new  product information, or search for previous records.'
+        );
+        
       }
     } catch (error) {
       console.error('Error fetching data:', error);

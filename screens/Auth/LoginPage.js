@@ -366,9 +366,7 @@ const LoginPage = ({ navigation }) => {
               <Icon name={passwordVisible ? 'visibility' : 'visibility-off'} size={24} color="#008080" />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.forgotPassword} onPress={() => navigation.navigate('ForgetPassword')}>
-            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-          </TouchableOpacity>
+         
           <TouchableOpacity
             style={[styles.button, !isButtonEnabled && styles.buttonDisabled, isTablet && styles.tabletButton]}
             onPress={handleLogin}

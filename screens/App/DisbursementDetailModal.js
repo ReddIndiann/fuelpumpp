@@ -1,17 +1,17 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
-const RecordDetailsModal = ({ isVisible, onClose, item }) => {
+const DisbursementDetailModal = ({ isVisible, onClose, item }) => {
   if (!item) return null;
 
   const details = [
     { label: 'Product', value: item.product_name },
     { label: 'Location', value: item.location_name },
-    { label: 'Record Date', value: item.record_date },
-    { label: 'Dipping Time', value: item.dipping_time },
-    { label: 'Dipping Quantity', value: item.dipping_quantity },
-    { label: 'Dispenser Quantity', value: item.dispenser_qunatity },
-   
+    { label: 'Price', value: item.price },
+    { label: 'Quantity', value: item.quantity },
+    { label: 'Amount', value: item.amount },
+    { label: 'Disbursed Date', value: item.disbursed_date },
+
   ];
 
   return (
@@ -24,7 +24,6 @@ const RecordDetailsModal = ({ isVisible, onClose, item }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <ScrollView contentContainerStyle={styles.scrollView}>
-            <Text style={styles.modalTitle}>{item.product_name}</Text>
             {details.map((detail, index) => (
               detail.value ? (
                 <View key={index} style={styles.detailItem}>
@@ -56,7 +55,10 @@ const styles = StyleSheet.create({
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -101,4 +103,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecordDetailsModal;
+export default DisbursementDetailModal;

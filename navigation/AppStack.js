@@ -10,7 +10,9 @@ import DispenseFuel from "../screens/App/DispenseFuel";
 import AddFunds from "../screens/App/AddFunds";
 import Profile from "../screens/App/Profile";
 import StockRecords from "../screens/App/StockRecords";
-
+import DepositList from '../screens/App/DepositList';
+import DisbursementList from '../screens/App/DisbursementList ';
+import WithdrawalList from '../screens/App/WithdrawalList';
 import ProductSupply from "../screens/App/Productsupply";
 import AddCustomers from "../screens/App/AddCustomers";
 import RedrawFund from "../screens/App/WithdrawFund";
@@ -110,22 +112,43 @@ const AppStack = () => {
           headerBackTitle: 'Back',
         }} 
       />
-      <Stack.Screen 
-        name="RecordList" 
-        component={RecordList} 
-        options={{ 
-          headerShown: true,
-          title: 'Record Product List',
-          headerBackTitle: 'Back',
-        }} 
-      />
+      
  
-       <Stack.Screen 
+      
+        <Stack.Screen 
         name="StockRecords" 
         component={StockRecords} 
         options={{ 
           headerShown: true,
           title: 'Stock Product List',
+          headerBackTitle: 'Back',
+        }} 
+      />
+        <Stack.Screen 
+        name="DepositList" 
+        component={DepositList} 
+        options={{ 
+          headerShown: true,
+          title: 'Deposit Product List',
+          headerBackTitle: 'Back',
+        }} 
+      />
+        <Stack.Screen 
+        name="DisburementList" 
+        component={DisbursementList} 
+        options={{ 
+          headerShown: true,
+          title: 'Disburement List',
+          headerBackTitle: 'Back',
+        }} 
+      />
+      
+      <Stack.Screen 
+        name="WithdrawalList" 
+        component={WithdrawalList} 
+        options={{ 
+          headerShown: true,
+          title: 'Withdrawal List',
           headerBackTitle: 'Back',
         }} 
       />

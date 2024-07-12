@@ -42,7 +42,6 @@ const Profile = () => {
         setFullName(user.Name || '');
         setEmail(user.email || '');
         setPhoneNumber(user.phoneNumber || '');
-
         setFormFullName(user.Name || '');
         setFormPhoneNumber(user.phoneNumber || '');
         setLocation(user.location || '');
@@ -113,9 +112,21 @@ const Profile = () => {
               <Icon name="person" size={80} color="#0601B4" style={styles.profileIcon} />
             </View>
             <Text style={styles.profileName}>{fullName}</Text>
-            <Text style={styles.profileName}>{location}</Text>
-            <Text style={styles.profileName}>{client}</Text>
-            <Text style={styles.profileEmail}>{email}</Text>
+            
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoLabel}>Location:</Text>
+              <Text style={styles.infoText}>{location}</Text>
+            </View>
+            
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoLabel}>Client:</Text>
+              <Text style={styles.infoText}>{client}</Text>
+            </View>
+            
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoLabel}>Email:</Text>
+              <Text style={styles.infoText}>{email}</Text>
+            </View>
           </View>
 
           <View style={styles.formContainer}>
@@ -128,26 +139,7 @@ const Profile = () => {
               placeholderTextColor="#a0a0a0"
             />
 
-            <Text style={styles.label}>Phone Number</Text>
-            <TextInput
-              style={styles.input}
-              value={formPhoneNumber}
-              onChangeText={setFormPhoneNumber}
-              placeholder="Enter your phone number"
-              placeholderTextColor="#a0a0a0"
-              keyboardType="phone-pad"
-            />
-
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email address"
-              placeholderTextColor="#a0a0a0"
-              keyboardType="email-address"
-              editable={false}
-            />
+          
 
             <Text style={styles.label}>New Password</Text>
             <View style={styles.passwordContainer}>
@@ -207,6 +199,14 @@ const styles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   profileIconContainer: {
     backgroundColor: '#979797',
@@ -219,13 +219,27 @@ const styles = StyleSheet.create({
     height: 80,
   },
   profileName: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 15,
   },
-  profileEmail: {
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    width: '100%',
+  },
+  infoLabel: {
     fontSize: 16,
-    color: '#777',
+    fontWeight: '600',
+    color: '#007B5D',
+    width: 80,
+  },
+  infoText: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
   },
   formContainer: {
     marginTop: 20,

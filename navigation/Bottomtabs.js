@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback,useContext } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import AuthContext from '../hooks/useAuthContext';
 import Home from '../screens/App/Home';
 import RecordList from '../screens/App/RecordList';
 import StockProductList from '../screens/App/StockProductList';
@@ -14,6 +14,7 @@ import Customers from '../screens/App/Customer';
 const Tab = createBottomTabNavigator();
 
 const AppTabs = () => {
+  const { logout } = useContext(AuthContext);
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
   const [location, setLocation] = useState('');
@@ -81,6 +82,7 @@ const AppTabs = () => {
       { cancelable: false }
     );
   };
+
 
   useFocusEffect(
     useCallback(() => {

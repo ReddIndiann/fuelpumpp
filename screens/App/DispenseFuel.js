@@ -11,7 +11,6 @@ import {
   Platform,
   ScrollView,
   Alert,
-  Keyboard,
   Modal,
   FlatList,
 } from 'react-native';
@@ -28,10 +27,7 @@ const DispenseFuel = () => {
   const { client } = route.params;
   const [balance, setBalance] = useState('0');
 
-  const [searchQuery, setSearchQuery] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [clientsPerPage] = useState(5);
   const [products, setProducts] = useState([]);
   const [productType, setProductType] = useState('');
   const [productId, setProductId] = useState('');
@@ -165,7 +161,7 @@ const DispenseFuel = () => {
       const data = await response.json();
       if (data.statuscode === '00') {
         Alert.alert('Success', 'Fuel dispensed successfully.');
-        navigation.navigate('Home');
+        navigation.navigate('DisburementList', { customerId: client.id });
       } else {
         Alert.alert('Error', data.message || 'Failed to dispense fuel.');
       }
@@ -303,7 +299,6 @@ const DispenseFuel = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

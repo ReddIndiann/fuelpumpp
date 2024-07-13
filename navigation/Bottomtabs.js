@@ -1,46 +1,36 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from '../screens/App/Home';
-import Record from '../screens/App/Records';
-import Supply from '../screens/App/Supply';
-import Customers from '../screens/App/Customer';
-import StockProductList from '../screens/App/StockProductList';
-import RecordList from '../screens/App/RecordList';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
-import ProductSupply from '../screens/App/Productsupply';
-import StockRecords from '../screens/App/StockRecords';
-import Clients from '../screens/App/AddCustomers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import AuthContext from '../hooks/useAuthContext';
+
+import Home from '../screens/App/Home';
+import RecordList from '../screens/App/RecordList';
+import StockProductList from '../screens/App/StockProductList';
+import Customers from '../screens/App/Customer';
 
 const Tab = createBottomTabNavigator();
 
 const AppTabs = () => {
-  const { logout } = useContext(AuthContext);
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
   const [location, setLocation] = useState('');
   const [greeting, setGreeting] = useState('');
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        if (savedUser) {
-          const user = JSON.parse(savedUser);
-          setUserName(user.Name);
-          setLocation(user.location);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+  const fetchUserData = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        setUserName(user.Name);
+        setLocation(user.location);
       }
-    };
-
-    fetchUserData();
-  }, []);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   useEffect(() => {
     const getCurrentGreeting = () => {
@@ -92,6 +82,12 @@ const AppTabs = () => {
     );
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [])
+  );
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -135,7 +131,7 @@ const AppTabs = () => {
     >
       <Tab.Screen 
         name="Home" 
-        component={Home}
+        component={HomeScreen}
         options={{
           headerTransparent: false,
           headerLeft: () => (
@@ -178,13 +174,13 @@ const AppTabs = () => {
         }}
       />
       
-      <Tab.Screen name="StockProductList" component={StockProductList} />
+      <Tab.Screen name="StockProductList" component={StockProductListScreen} />
 
-      <Tab.Screen name="RecordList" component={RecordList} />
+      <Tab.Screen name="RecordList" component={RecordListScreen} />
      
       <Tab.Screen 
         name="Customers" 
-        component={Customers} 
+        component={CustomersScreen} 
         options={{ headerShown: false }}
         listeners={({ navigation }) => ({
           tabPress: e => {
@@ -196,6 +192,54 @@ const AppTabs = () => {
       
     </Tab.Navigator>
   );
+};
+
+const HomeScreen = () => {
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Home Screen is focused');
+      return () => {
+        console.log('Home Screen is unfocused');
+      };
+    }, [])
+  );
+  return <Home />;
+};
+
+const StockProductListScreen = () => {
+  useFocusEffect(
+    useCallback(() => {
+      console.log('StockProductList Screen is focused');
+      return () => {
+        console.log('StockProductList Screen is unfocused');
+      };
+    }, [])
+  );
+  return <StockProductList />;
+};
+
+const RecordListScreen = () => {
+  useFocusEffect(
+    useCallback(() => {
+      console.log('RecordList Screen is focused');
+      return () => {
+        console.log('RecordList Screen is unfocused');
+      };
+    }, [])
+  );
+  return <RecordList />;
+};
+
+const CustomersScreen = () => {
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Customers Screen is focused');
+      return () => {
+        console.log('Customers Screen is unfocused');
+      };
+    }, [])
+  );
+  return <Customers />;
 };
 
 export default AppTabs;

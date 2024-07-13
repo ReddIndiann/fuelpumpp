@@ -1,57 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  SafeAreaView,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import { StyleSheet, SafeAreaView, Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
-  const [userData, setUserData] = useState(null);
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [user, setUser] = useState(null);
+  const [formFullName, setFormFullName] = useState('');
+  const [formPhoneNumber, setFormPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [location, setLocation] = useState('');
-  const [client, setClient] = useState('');
   const [verifyPassword, setVerifyPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [verifyPasswordVisible, setVerifyPasswordVisible] = useState(false);
 
-  const [formFullName, setFormFullName] = useState('');
-  const [formPhoneNumber, setFormPhoneNumber] = useState('');
-
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem('user');
+        if (savedUser) {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
+          setFormFullName(parsedUser.Name);
+          setFormPhoneNumber(parsedUser.phoneNumber);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
     fetchUserData();
   }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const savedUser = await AsyncStorage.getItem('user');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        setUserData(user);
-        setFullName(user.Name || '');
-        setEmail(user.email || '');
-        setPhoneNumber(user.phoneNumber || '');
-        setFormFullName(user.Name || '');
-        setFormPhoneNumber(user.phoneNumber || '');
-        setLocation(user.location || '');
-        setClient(user.client || '');
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      Alert.alert('Error', 'Failed to load user data');
-    }
-  };
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -75,7 +52,7 @@ const Profile = () => {
           'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
         },
         body: JSON.stringify({
-          agent_id: userData.id,
+          agent_id: user.id,
           name: formFullName,
           phoneNumber: formPhoneNumber,
           password: password,
@@ -83,11 +60,9 @@ const Profile = () => {
       });
 
       if (response.ok) {
-        const updatedUser = { ...userData, Name: formFullName, phoneNumber: formPhoneNumber };
+        const updatedUser = { ...user, Name: formFullName, phoneNumber: formPhoneNumber };
         await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-        setUserData(updatedUser);
-        setFullName(formFullName);
-        setPhoneNumber(formPhoneNumber);
+        setUser(updatedUser);
         Alert.alert('Success', 'Profile updated successfully');
       } else {
         Alert.alert('Error', 'Failed to update profile');
@@ -97,6 +72,10 @@ const Profile = () => {
       Alert.alert('Error', 'An error occurred while updating profile');
     }
   };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -111,21 +90,21 @@ const Profile = () => {
             <View style={styles.profileIconContainer}>
               <Icon name="person" size={80} color="#0601B4" style={styles.profileIcon} />
             </View>
-            <Text style={styles.profileName}>{fullName}</Text>
+            <Text style={styles.profileName}>{user.Name}</Text>
             
             <View style={styles.infoContainer}>
               <Text style={styles.infoLabel}>Location:</Text>
-              <Text style={styles.infoText}>{location}</Text>
+              <Text style={styles.infoText}>{user.location}</Text>
             </View>
             
             <View style={styles.infoContainer}>
               <Text style={styles.infoLabel}>Client:</Text>
-              <Text style={styles.infoText}>{client}</Text>
+              <Text style={styles.infoText}>{user.client}</Text>
             </View>
             
             <View style={styles.infoContainer}>
               <Text style={styles.infoLabel}>Email:</Text>
-              <Text style={styles.infoText}>{email}</Text>
+              <Text style={styles.infoText}>{user.email}</Text>
             </View>
           </View>
 
@@ -138,8 +117,6 @@ const Profile = () => {
               placeholder="Enter your full name"
               placeholderTextColor="#a0a0a0"
             />
-
-          
 
             <Text style={styles.label}>New Password</Text>
             <View style={styles.passwordContainer}>

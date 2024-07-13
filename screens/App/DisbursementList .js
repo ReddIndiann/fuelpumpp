@@ -14,11 +14,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-import ProductDetailsModal from './ProductDetailModal';
 import DisbursementDetailModal from './DisbursementDetailModal';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 
-const DisbursementList  = ({ navigation }) => {
+const DisbursementList = ({ navigation }) => {
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
   const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
@@ -28,6 +27,9 @@ const DisbursementList  = ({ navigation }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const route = useRoute();
+  const { customerId } = route.params || { customerId: "2" }; // Default to "2" if not provided
 
   const fetchAgentId = useCallback(async () => {
     try {
@@ -48,11 +50,11 @@ const DisbursementList  = ({ navigation }) => {
         method: 'POST',
         headers: {
           'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
-          'Content-Type': 'application/json',
+        
         },
         body: JSON.stringify({
           agent_id: agentId,
-          customer_id: "2",
+          customer_id: customerId,
           start_date: startDate,
           end_date: endDate,
         }),
@@ -65,9 +67,8 @@ const DisbursementList  = ({ navigation }) => {
       } else {
         Alert.alert(
           'List Fetch Unsuccessful',
-          'No stock of the product has been recorded today. Please enter new  product information, or search for previous records.'
+          'No stock of the product has been recorded today. Please enter new product information, or search for previous records.'
         );
-        
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -75,7 +76,7 @@ const DisbursementList  = ({ navigation }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [agentId, startDate, endDate]);
+  }, [agentId, customerId, startDate, endDate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -106,12 +107,12 @@ const DisbursementList  = ({ navigation }) => {
         <Text style={styles.productName}>{item.product_name}</Text>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Supplied Quantity:</Text>
-            <Text style={styles.detailValue}>{item.delivered_quantity}</Text>
+            <Text style={styles.detailLabel}>Quantity:</Text>
+            <Text style={styles.detailValue}>{item.quantity}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Supplied Date:</Text>
-            <Text style={styles.detailValue}>{item.arrival_date}</Text>
+            <Text style={styles.detailLabel}>Disbursed Date:</Text>
+            <Text style={styles.detailValue}>{item.disbursed_date}</Text>
           </View>
         </View>
       </View>
@@ -125,7 +126,6 @@ const DisbursementList  = ({ navigation }) => {
       </View>
     );
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>

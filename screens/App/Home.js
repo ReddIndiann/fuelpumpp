@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, ScrollView, SafeAreaView, Text, View, ImageBackground, Dimensions, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const Home = () => {
   const navigation = useNavigation();
@@ -14,28 +14,30 @@ const Home = () => {
   const [agentId, setAgentId] = useState(null);
   const [monthlySalesData, setMonthlySalesData] = useState([]);
 
-  useEffect(() => {
-    const fetchAgentId = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        const user = JSON.parse(savedUser);
-        setAgentId(user?.id);
-      } catch (error) {
-        console.error('Failed to fetch agent ID:', error);
-      }
-    };
+  const fetchAgentId = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(savedUser);
+      setAgentId(user?.id);
+    } catch (error) {
+      console.error('Failed to fetch agent ID:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchAgentId();
   }, []);
 
-  useEffect(() => {
-    if (agentId) {
-      fetchExistingClients();
-      fetchTotalAmountSold();
-      fetchMonthlySales();
-      fetchStockRecords();
-    }
-  }, [agentId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (agentId) {
+        fetchExistingClients();
+        fetchTotalAmountSold();
+        fetchMonthlySales();
+        fetchStockRecords();
+      }
+    }, [agentId])
+  );
 
   const fetchExistingClients = async () => {
     try {
@@ -126,7 +128,7 @@ const Home = () => {
         console.error('Failed to fetch stock records:', data.message);
       }
     } catch (error) {
-      console.error('Error fddddddd                          etching stock records:', error);
+      console.error('Error fetching stock records:', error);
     }
   };
 
@@ -243,7 +245,6 @@ const Home = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

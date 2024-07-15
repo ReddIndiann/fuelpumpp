@@ -198,11 +198,11 @@ import { StyleSheet, SafeAreaView, Text, View, TouchableOpacity, Image, useWindo
 import Swiper from 'react-native-swiper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigateToScreen } from '../../hooks/useNavigateToScreen';
+
 
 const Intro = () => {
   const navigation = useNavigation();
-  const navigateToScreen = useNavigateToScreen();
+
   const { width, height } = useWindowDimensions();
   const isTablet = width >= 768;
   const swiperRef = useRef(null);

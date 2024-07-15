@@ -130,12 +130,12 @@ const DisbursementList = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.label}>Disbursement List</Text>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('ProductSupply')}
         >
           <Icon name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View style={styles.datePickerContainer}>
         <TouchableOpacity

@@ -14,10 +14,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-import RecordDetailsModal from './RecordDetailsModal ';
-import { useFocusEffect } from '@react-navigation/native';
+import RecordDetailsModal from './RecordDetailsModal';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-const RecordList = ({ navigation }) => {
+const RecordList = () => {
+  const navigation = useNavigation();
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
   const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
@@ -80,6 +81,17 @@ const RecordList = ({ navigation }) => {
     }, [fetchAgentId, fetchData])
   );
 
+  const handleDateChange = (event, selectedDate, isStartDate) => {
+    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
+    if (isStartDate) {
+      setShowStartDatePicker(Platform.OS === 'ios');
+      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
+    } else {
+      setShowEndDatePicker(Platform.OS === 'ios');
+      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
+    }
+  };
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
@@ -103,17 +115,6 @@ const RecordList = ({ navigation }) => {
       </View>
     </TouchableOpacity>
   );
-
-  const handleDateChange = (event, selectedDate, isStartDate) => {
-    const currentDate = selectedDate || (isStartDate ? new Date(startDate) : new Date(endDate));
-    if (isStartDate) {
-      setShowStartDatePicker(Platform.OS === 'ios');
-      setStartDate(moment(currentDate).format('YYYY-MM-DD'));
-    } else {
-      setShowEndDatePicker(Platform.OS === 'ios');
-      setEndDate(moment(currentDate).format('YYYY-MM-DD'));
-    }
-  };
 
   if (isLoading) {
     return (
@@ -181,6 +182,7 @@ const RecordList = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+ 
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

@@ -15,9 +15,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import ProductDetailsModal from './ProductDetailModal';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-const StockProductList = ({ navigation }) => {
+const StockProductList = () => {
+  const navigation = useNavigation();
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
   const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
@@ -63,9 +64,8 @@ const StockProductList = ({ navigation }) => {
       } else {
         Alert.alert(
           'List Fetch Unsuccessful',
-          'No stock of the product has been recorded today. Please enter new  product information, or search for previous records.'
+          'No stock of the product has been recorded today. Please enter new product information, or search for previous records.'
         );
-        
       }
     } catch (error) {
       console.error('Error fetching data:', error);

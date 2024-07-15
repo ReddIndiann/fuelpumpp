@@ -4,14 +4,17 @@ import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'rea
 const DisbursementDetailModal = ({ isVisible, onClose, item }) => {
   if (!item) return null;
 
+  const formatAmount = (amount) => {
+    return `₵${parseFloat(amount).toFixed(2)}`;
+  };
+
   const details = [
     { label: 'Product', value: item.product_name },
     { label: 'Location', value: item.location_name },
-    { label: 'Price', value: item.price },
+    { label: 'Price', value: formatAmount(item.price) },
     { label: 'Quantity', value: item.quantity },
-    { label: 'Amount', value: item.amount },
+    { label: 'Amount', value: formatAmount(item.amount) },
     { label: 'Disbursed Date', value: item.disbursed_date },
-
   ];
 
   return (

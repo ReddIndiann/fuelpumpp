@@ -176,9 +176,9 @@ const AppTabs = () => {
         }}
       />
       
-      <Tab.Screen name="StockProductList" component={StockProductListScreen} />
+      <Tab.Screen name="StockProductList" component={StockProductListScreen}    options={{ headerShown: false }} />
 
-      <Tab.Screen name="RecordList" component={RecordListScreen} />
+      <Tab.Screen name="RecordList" component={RecordListScreen}    options={{ headerShown: false }}/>
      
       <Tab.Screen 
         name="Customers" 

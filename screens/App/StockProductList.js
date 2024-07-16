@@ -127,7 +127,7 @@ const StockProductList = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.label}>Product List</Text>
+        <Text style={styles.label}>Supply History</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('ProductSupply')}

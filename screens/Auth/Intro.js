@@ -258,7 +258,7 @@ const Intro = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, isTablet && styles.tabletButton]}
-          onPress={() => navigateToScreen('Login')}
+          onPress={() => navigation.navigate('Login')}
         >
           <LinearGradient
             colors={['#008080', '#00A3A3']}

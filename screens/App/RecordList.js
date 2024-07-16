@@ -127,7 +127,7 @@ const RecordList = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.label}>Record List</Text>
+        <Text style={styles.label}>Daily Recordings</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('StockRecords')}

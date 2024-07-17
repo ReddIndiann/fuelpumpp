@@ -68,7 +68,7 @@ const Customer = () => {
 
   const filteredClients = clients.filter((client) =>
     (client.name && client.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (client.phoneNumber && client.phoneNumber.includes(searchQuery))
+    (client.phonenumber && client.phonenumber.includes(searchQuery))
   );
 
   const renderClient = ({ item }) => (
@@ -94,7 +94,6 @@ const Customer = () => {
       <Ionicons name="chevron-forward" size={24} color="#007B5D" />
     </TouchableOpacity>
   );
-  
 
   if (loading) {
     return (
@@ -134,7 +133,7 @@ const Customer = () => {
           style={styles.flatList}
           contentContainerStyle={styles.flatListContent}
         />
-        <View style={styles.hidenon}></View>
+        <View style={styles.hiddenSpacer} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -232,6 +231,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  cardStatusText: {
+    fontSize: 14,
+    color: '#333',
+  },
   cardStatus: {
     fontSize: 14,
     fontWeight: 'bold',
@@ -242,13 +245,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f4f3f3',
   },
-  cardStatusText: {
-    fontSize: 14,
-    color: '#333', // Normal text color
+  hiddenSpacer: {
+    height: "10%",
   },
-  hidenon:{
-    height:"10%"
-  }
 });
 
 export default Customer;

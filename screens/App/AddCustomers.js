@@ -225,6 +225,7 @@ const AddCustomers = () => {
               onChangeText={(text) => setWalletNumber(text)}
               style={styles.input}
               placeholderTextColor="#a0a0a0"
+                 keyboardType="phone-pad"
             />
           </View>
 

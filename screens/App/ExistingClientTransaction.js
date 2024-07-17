@@ -102,7 +102,7 @@ const ExistingClientTransaction = () => {
       );
       if (response.status === 200) {
         Alert.alert('Success', 'Account closed successfully');
-        navigation.navigate('Client');
+        navigation.navigate('Customers');
       } else {
         Alert.alert('Error', 'Failed to close account');
       }

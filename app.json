@@ -4,10 +4,10 @@
     "slug": "fuelsystem",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/greenpump.png",
+    "icon": "./assets/fuelicon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/greenpump.png",
+      "image": "./assets/fuelicon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,12 +17,12 @@
     "android": {
       "package": "com.fuelsystem.fuelsystem",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/greenpump.png",
+        "foregroundImage": "./assets/fuelicon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/greenpump.png"
+      "favicon": "./assets/fuelicon.png"
     },
     "extra": {
       "eas": {

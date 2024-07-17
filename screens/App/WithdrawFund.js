@@ -86,7 +86,7 @@ const WithdrawFunds = ({ route, navigation }) => {
       });
 
       Alert.alert('Success', 'withdrawal request has been initiated successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+        { text: 'OK', onPress: () => navigation.navigate('WithdrawalList', { customerId: client.id }) }
       ]);
     } catch (error) {
       Alert.alert('Error', 'Failed to withdraw funds.');

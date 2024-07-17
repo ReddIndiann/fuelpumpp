@@ -63,7 +63,7 @@ const StockProductList = () => {
         setProductData(responseData.data);
       } else {
         Alert.alert(
-          'List Fetch Unsuccessful',
+          'No List For Today',
           'No stock of the product has been recorded today. Please enter new product information, or search for previous records.'
         );
       }

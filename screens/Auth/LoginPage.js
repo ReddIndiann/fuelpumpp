@@ -337,7 +337,7 @@ const LoginPage = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Image source={require('../../assets/slider5.png')} style={styles.logo} />
+          <Image source={require('../../assets/fuelicon.png')} style={styles.logo} />
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.pageinfo}>
             Log in to access your account and manage your fuel efficiently

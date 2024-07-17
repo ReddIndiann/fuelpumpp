@@ -11,7 +11,7 @@ const DisbursementDetailModal = ({ isVisible, onClose, item }) => {
   const details = [
     { label: 'Product', value: item.product_name },
     { label: 'Location', value: item.location_name },
-    { label: 'Price', value: formatAmount(item.price) },
+    { label: 'Price(Litre)', value: formatAmount(item.price) },
     { label: 'Quantity', value: item.quantity },
     { label: 'Amount', value: formatAmount(item.amount) },
     { label: 'Disbursed Date', value: item.disbursed_date },

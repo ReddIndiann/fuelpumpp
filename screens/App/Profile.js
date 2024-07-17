@@ -39,6 +39,11 @@ const Profile = () => {
   };
 
   const updateUserDetails = async () => {
+    if (!formFullName ||  !password || !verifyPassword) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
+
     if (password !== verifyPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -54,7 +59,7 @@ const Profile = () => {
         body: JSON.stringify({
           agent_id: user.id,
           name: formFullName,
-          phoneNumber: formPhoneNumber,
+       
           password: password,
         }),
       });
@@ -117,6 +122,7 @@ const Profile = () => {
               placeholder="Enter your full name"
               placeholderTextColor="#a0a0a0"
             />
+
 
             <Text style={styles.label}>New Password</Text>
             <View style={styles.passwordContainer}>

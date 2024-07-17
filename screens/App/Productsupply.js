@@ -238,7 +238,7 @@ const ProductSupply = () => {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Driver Number</Text>
+            <Text style={styles.label}>Driver's Phone Number</Text>
             <TextInput
               placeholder="Enter driver number"
               value={driverNumber}

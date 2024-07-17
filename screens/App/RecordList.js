@@ -63,8 +63,8 @@ const RecordList = () => {
         setProductData(responseData.data);
       } else {
         Alert.alert(
-          'List Fetch Unsuccessful',
-          'No stock of the product has been recorded today. Please enter new stock record information, or search for previous records.'
+          'No List For Today',
+          'No stock of any product has been recorded today. Please enter new stock record information, or search for previous records.'
         );
       }
     } catch (error) {

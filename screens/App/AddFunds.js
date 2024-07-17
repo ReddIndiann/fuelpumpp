@@ -44,12 +44,12 @@ const AddFunds = ({ route, navigation }) => {
           }
         );
         if (response.status === 200 && response.data.statuscode === '00') {
-          setBalance(response.data.data.balance); // Update balance state
+          setBalance(response.data.data.balance);
         } else {
-          setBalance('0'); // Show 0 if customer has no account
+          setBalance('0');
         }
       } catch (error) {
-        setBalance('0'); // Show 0 in case of an error
+        setBalance('0');
       }
     };
 
@@ -58,8 +58,8 @@ const AddFunds = ({ route, navigation }) => {
   }, [client.customerId]);
 
   const handleAddFunds = () => {
-    if (!amount) {
-      Alert.alert('Error', 'Please fill in all fields.');
+    if (!amount || parseFloat(amount) <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount greater than 0.');
       return;
     }
     const data = {
@@ -77,9 +77,8 @@ const AddFunds = ({ route, navigation }) => {
     })
       .then(response => {
         Alert.alert("Success", "A prompt has been sent to the customer's phone to complete the payment", [
-          { text: "OK", onPress: () => navigation.goBack() }
+          { text: "OK", onPress: () =>  navigation.navigate('DepositList', { customerId: client.id }) }
         ]);
-        
       })
       .catch(error => {
         Alert.alert('Error', 'Failed to add funds.');

@@ -66,8 +66,8 @@ const DisbursementList = ({ navigation }) => {
         setProductData(responseData.data);
       } else {
         Alert.alert(
-          'List Fetch Unsuccessful',
-          'No stock of the product has been recorded today. Please enter new product information, or search for previous records.'
+          'No List For Today',
+          'No Disbursement has been recorded today. Please enter make sales, or search for previous records.'
         );
       }
     } catch (error) {

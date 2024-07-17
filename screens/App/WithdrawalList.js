@@ -15,10 +15,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import WithdrawalDetailModal from './WithdrawalDetailModal';
-import ProductDetailsModal from './ProductDetailModal';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 
-const WithdrawalList  = ({ navigation }) => {
+const WithdrawalList = ({ navigation }) => {
   const [productData, setProductData] = useState([]);
   const [agentId, setAgentId] = useState(null);
   const [startDate, setStartDate] = useState(moment().format('YYYY-MM-DD'));
@@ -28,6 +27,9 @@ const WithdrawalList  = ({ navigation }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const route = useRoute();
+  const { customerId } = route.params || { customerId: "2" }; // Default to "2" if not provided
 
   const fetchAgentId = useCallback(async () => {
     try {
@@ -44,14 +46,15 @@ const WithdrawalList  = ({ navigation }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('https://gcnm.wigal.com.gh/fetchProductsupplylist', {
+      const response = await fetch('https://gcnm.wigal.com.gh/customerdisbursementlist', {
         method: 'POST',
         headers: {
           'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
-          'Content-Type': 'application/json',
+        
         },
         body: JSON.stringify({
           agent_id: agentId,
+          customer_id: customerId,
           start_date: startDate,
           end_date: endDate,
         }),
@@ -63,10 +66,9 @@ const WithdrawalList  = ({ navigation }) => {
         setProductData(responseData.data);
       } else {
         Alert.alert(
-          'List Fetch Unsuccessful',
-          'No stock of the product has been recorded today. Please enter new  product information, or search for previous records.'
+          'No List For Today',
+          'No Disbursement has been recorded today. Please enter make sales, or search for previous records.'
         );
-        
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -74,7 +76,7 @@ const WithdrawalList  = ({ navigation }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [agentId, startDate, endDate]);
+  }, [agentId, customerId, startDate, endDate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,12 +107,12 @@ const WithdrawalList  = ({ navigation }) => {
         <Text style={styles.productName}>{item.product_name}</Text>
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Supplied Quantity:</Text>
-            <Text style={styles.detailValue}>{item.delivered_quantity}</Text>
+            <Text style={styles.detailLabel}>Quantity:</Text>
+            <Text style={styles.detailValue}>{item.quantity}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Supplied Date:</Text>
-            <Text style={styles.detailValue}>{item.arrival_date}</Text>
+            <Text style={styles.detailLabel}>Disbursed Date:</Text>
+            <Text style={styles.detailValue}>{item.disbursed_date}</Text>
           </View>
         </View>
       </View>
@@ -124,17 +126,16 @@ const WithdrawalList  = ({ navigation }) => {
       </View>
     );
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.label}>Withdrawal List</Text>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('ProductSupply')}
         >
           <Icon name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View style={styles.datePickerContainer}>
         <TouchableOpacity

@@ -120,11 +120,21 @@ const DispenseFuel = () => {
 
   const calculateAmount = () => {
     if (inputType === 'quantity' && quantity && pricePerLitre) {
-      const calculatedAmount = (parseFloat(quantity) * parseFloat(pricePerLitre)).toFixed(2);
-      setAmount(calculatedAmount);
+      const numericQuantity = parseFloat(quantity);
+      if (numericQuantity > 0) {
+        const calculatedAmount = (numericQuantity * parseFloat(pricePerLitre)).toFixed(2);
+        setAmount(calculatedAmount);
+      } else {
+        setAmount('');
+      }
     } else if (inputType === 'amount' && amount && pricePerLitre) {
-      const calculatedQuantity = (parseFloat(amount) / parseFloat(pricePerLitre)).toFixed(2);
-      setQuantity(calculatedQuantity);
+      const numericAmount = parseFloat(amount);
+      if (numericAmount > 0) {
+        const calculatedQuantity = (numericAmount / parseFloat(pricePerLitre)).toFixed(2);
+        setQuantity(calculatedQuantity);
+      } else {
+        setQuantity('');
+      }
     }
   };
 
@@ -134,11 +144,18 @@ const DispenseFuel = () => {
       return;
     }
 
-    const numericBalance = parseFloat(balance);
+    const numericQuantity = parseFloat(quantity);
     const numericAmount = parseFloat(amount);
 
+    if (numericQuantity <= 0 || numericAmount <= 0) {
+      Alert.alert('Error', 'Quantity and amount must be greater than 0.');
+      return;
+    }
+
+    const numericBalance = parseFloat(balance);
+
     if (numericAmount > numericBalance) {
-      Alert.alert('Error', 'Insufficient balance.');
+      Alert.alert('Insufficient Balance', 'The amount exceeds the available balance.');
       return;
     }
 
@@ -147,14 +164,15 @@ const DispenseFuel = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'API-KEY': 'muJFx9F3E5ptBExkz8Fqroa1D79gv9Nv',
         },
         body: JSON.stringify({
           agent_id: agentId,
           customer_id: client.id,
           product_id: productId,
           price: pricePerLitre,
-          quantity,
-          amount: amount,
+          quantity: numericQuantity,
+          amount: numericAmount,
         }),
       });
 
@@ -299,6 +317,7 @@ const DispenseFuel = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

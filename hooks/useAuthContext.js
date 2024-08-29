@@ -12,6 +12,8 @@ export const AuthProvider = ({ children }) => {
         const savedUser = await AsyncStorage.getItem('user');
         if (savedUser) {
           setUser(JSON.parse(savedUser));
+        } else {
+          console.log('No user found in AsyncStorage.');
         }
       } catch (error) {
         console.error('Failed to load user from AsyncStorage:', error);
@@ -22,6 +24,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData) => {
+    if (!userData) {
+      console.error('User data is undefined or null, cannot save to AsyncStorage.');
+      return;
+    }
+    
     try {
       setUser(userData);
       await AsyncStorage.setItem('user', JSON.stringify(userData));

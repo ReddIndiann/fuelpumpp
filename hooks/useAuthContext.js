@@ -7,44 +7,44 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const savedUser = await AsyncStorage.getItem('user');
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        } else {
-          console.log('No user found in AsyncStorage.');
-        }
-      } catch (error) {
-        console.error('Failed to load user from AsyncStorage:', error);
-      }
-    };
+    // const loadUser = async () => {
+    // //   try {
+    // //     const savedUser = await AsyncStorage.getItem('user');
+    // //     if (savedUser) {
+    // //       setUser(JSON.parse(savedUser));
+    // //     } else {
+    // //       console.log('No user found in AsyncStorage.');
+    // //     }
+    // //   } catch (error) {
+    // //     console.error('Failed to load user from AsyncStorage:', error);
+    // //   }
+    // // };
 
-    loadUser();
+    // // loadUser();
   }, []);
 
-  const login = async (userData) => {
-    if (!userData) {
-      console.error('User data is undefined or null, cannot save to AsyncStorage.');
-      return;
-    }
+  // const login = async (userData) => {
+  //   if (!userData) {
+  //     console.error('User data is undefined or null, cannot save to AsyncStorage.');
+  //     return;
+  //   }
     
-    try {
-      setUser(userData);
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-    } catch (error) {
-      console.error('Failed to save user to AsyncStorage:', error);
-    }
-  };
+  //   try {
+  //     setUser(userData);
+  //     await AsyncStorage.setItem('user', JSON.stringify(userData));
+  //   } catch (error) {
+  //     console.error('Failed to save user to AsyncStorage:', error);
+  //   }
+  // };
 
-  const logout = async () => {
-    try {
-      setUser(null);
-      await AsyncStorage.removeItem('user');
-    } catch (error) {
-      console.error('Failed to remove user from AsyncStorage:', error);
-    }
-  };
+  // const logout = async () => {
+  //   try {
+  //     setUser(null);
+  //     await AsyncStorage.removeItem('user');
+  //   } catch (error) {
+  //     console.error('Failed to remove user from AsyncStorage:', error);
+  //   }
+  // };
 
   return (
     <AuthContext.Provider value={{ user, setUser, login, logout }}>
@@ -54,3 +54,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
+
+
